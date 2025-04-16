@@ -61,7 +61,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className,
     });
 
-    return <Comp className={cn(classNameValue)} ref={ref} {...props} />;
+    return <Comp className={classNameValue} ref={ref} {...props} />;
   },
 );
 Button.displayName = "Button";

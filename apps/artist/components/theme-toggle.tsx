@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../components/ui/button";
 import { cn } from "../lib/utils";
 
 interface ThemeToggleProps {
@@ -27,7 +27,7 @@ export function ModeToggle({
     <Button
       variant="ghost"
       size="icon"
-      className={cn("h-9 w-9 rounded-md", collapsed && "justify-center")}
+      className={cn("h-9 w-9 rounded-md", collapsed ? "justify-center" : "")}
       onClick={toggleTheme}
     >
       {showIcons &&
