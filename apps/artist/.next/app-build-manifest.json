@@ -1,13 +1,15 @@
 {
   "pages": {
     "/(app)/page": [
-      "static/chunks/node_modules_next_dist_1a6ee436._.js",
-      "static/chunks/node_modules_next_dist_client_components_not-found-error_c0237562.js",
-      "static/chunks/[root-of-the-server]__ac1abeae._.css",
-      "static/chunks/node_modules_812d06f0._.js",
-      "static/chunks/apps_artist_app_(app)_layout_tsx_c0237562._.js",
-      "static/chunks/_97062e29._.js",
-      "static/chunks/apps_artist_app_(app)_page_tsx_5d8afde3._.js",
+      "static/chunks/[next]_internal_font_google_inter_59dee874_module_bfeb2d0c.css",
+      "static/chunks/node_modules_@clerk_nextjs_dist_esm_app-router_62d46be8._.js",
+      "static/chunks/node_modules_5dea8c37._.js",
+      "static/chunks/apps_artist_app_layout_tsx_c0237562._.js",
+      "static/chunks/[root-of-the-server]__03ac4a2a._.js",
+      "static/chunks/apps_artist_globals_d6b86bc4.css",
+      "static/chunks/apps_artist_app_(app)_layout_tsx_0f7555b7._.js",
+      "static/chunks/apps_artist_app_(app)_page_tsx_c9b6baa8._.js",
+      "static/chunks/apps_artist_app_(app)_page_tsx_6072a1b5._.js",
       "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_fd44f5a4._.js",
       "static/chunks/node_modules_next_dist_compiled_2ce9398a._.js",
       "static/chunks/node_modules_next_dist_client_8f19e6fb._.js",
