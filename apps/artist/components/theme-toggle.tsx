@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -17,10 +18,28 @@ export function ModeToggle({
   align = "center",
 }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
+
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn("h-9 w-9 rounded-md", collapsed ? "justify-center" : "")}
+        disabled
+      >
+        <div className="h-4 w-4" />
+      </Button>
+    );
+  }
 
   return (
     <Button
@@ -35,6 +54,7 @@ export function ModeToggle({
         ) : (
           <Sun className="h-4 w-4" />
         ))}
+      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 }

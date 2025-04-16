@@ -1,9 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 // Define routes that require authentication
 const protectedRoutes = createRouteMatcher([
   "/dashboard(.*)",
-  "/upload(.*)",
+  "/music(.*)",
+  "/marketing(.*)",
   "/settings(.*)",
 ]);
 
@@ -20,7 +22,7 @@ export default clerkMiddleware(async (auth, request) => {
       // Redirect to sign-in page if user is not authenticated
       const signInUrl = new URL("/sign-in", nextUrl.origin);
       signInUrl.searchParams.set("redirect_url", nextUrl.pathname);
-      return Response.redirect(signInUrl);
+      return NextResponse.redirect(signInUrl);
     }
   }
 });
