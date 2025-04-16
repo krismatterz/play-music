@@ -3,46 +3,31 @@
   "version": "0.1.3",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "build": "next build --turbopack",
-    "check": "next lint && tsc --noEmit",
-    "dev": "next dev --turbo",
+    "build": "turbo run build",
+    "build:website": "cd apps/play && bun run build",
+    "build:app": "cd apps/artist && bun run build",
+    "dev:website": "cd apps/play && bun run dev --turbopack",
+    "dev:app": "cd apps/artist && bun run dev --turbopack",
+    "start:website": "cd apps/play && bun run start",
+    "start:app": "cd apps/artist && bun run start",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "preview": "next build && next start",
-    "start": "next start",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@t3-oss/env-nextjs": "^0.12.0",
-    "@tabler/icons-react": "^3.31.0",
-    "classnames": "^2.5.1",
-    "framer-motion": "^12.6.3",
-    "gsap": "^3.12.7",
-    "next": "^15.3.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.2"
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@tailwindcss/postcss": "^4.1.3",
     "@types/node": "^20.17.30",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.2",
     "eslint": "^9.24.0",
-    "eslint-config-next": "^15.3.0",
-    "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
-    "tailwindcss": "^4.1.3",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.29.1"
-  },
-  "ct3aMetadata": {
-    "initVersion": "7.39.3"
+    "typescript": "^5.6.2",
+    "turbo": "^2.2.3"
   }
 }

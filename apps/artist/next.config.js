@@ -4,7 +4,10 @@
  */
 import "./src/env.js";
 
-/** @type {import("next").NextConfig} */
-const config = {};
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+  transpilePackages: ["@play/ui"], // Ensure shared UI package is transpiled
+};
 
 export default config;
