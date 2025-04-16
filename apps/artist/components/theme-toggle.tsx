@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { cn } from "../lib/utils";
@@ -16,11 +16,10 @@ export function ModeToggle({
   collapsed = false,
   align = "center",
 }: ThemeToggleProps) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-    // In a real app, you'd implement actual theme switching here
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -31,10 +30,10 @@ export function ModeToggle({
       onClick={toggleTheme}
     >
       {showIcons &&
-        (theme === "light" ? (
-          <Sun className="h-4 w-4" />
-        ) : (
+        (theme === "dark" ? (
           <Moon className="h-4 w-4" />
+        ) : (
+          <Sun className="h-4 w-4" />
         ))}
     </Button>
   );
