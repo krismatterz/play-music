@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@play/ui";
-import Link from "next/link";
 import { UserButton, useUser } from "@clerk/nextjs";
 
 export default function DashboardPage() {
@@ -20,7 +19,7 @@ export default function DashboardPage() {
       <div className="mb-6 flex items-center justify-center gap-4">
         <div className="flex flex-col items-center">
           <div className="mb-2">
-            <UserButton afterSignOutUrl="/sign-in" />
+            <UserButton />
           </div>
           {user && (
             <p className="text-lg font-medium text-gray-200">

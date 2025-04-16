@@ -8,7 +8,6 @@ import { ModeToggle as ThemeToggle } from "./theme-toggle";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
-  FileText,
   Users,
   Settings,
   ChevronLeft,
@@ -38,8 +37,8 @@ const sidebarItems = [
     icon: Music as React.ComponentType<{ className?: string }>,
   },
   {
-    title: "navigation.artists",
-    href: "/artists",
+    title: "navigation.marketing",
+    href: "/marketing",
     icon: Users as React.ComponentType<{ className?: string }>,
   },
   {
@@ -92,8 +91,8 @@ export function Sidebar() {
         return "Dashboard";
       case "navigation.music":
         return "Music";
-      case "navigation.artists":
-        return "Artists";
+      case "navigation.marketing":
+        return "Marketing";
       case "navigation.settings":
         return "Settings";
       default:
