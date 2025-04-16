@@ -1,6 +1,6 @@
 {
   "name": "@play/artist-dashboard",
-  "version": "0.1.0",
+  "version": "0.1.12",
   "private": true,
   "type": "module",
   "scripts": {
