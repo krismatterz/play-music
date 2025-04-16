@@ -32,6 +32,7 @@
   },
   "include": [
     "next-env.d.ts",
+    "../../packages/tailwind-config/tailwind.config.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.cjs",
