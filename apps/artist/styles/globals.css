@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  /* Define theme variables if needed */
+}
+
+body {
+  /* Add base body styles */
+  @apply bg-gray-100; /* Example background */
+}
