@@ -118,7 +118,7 @@ export function Sidebar() {
   return (
     <div className="sticky top-0 hidden h-screen p-6 md:block">
       <div
-        className={`bg-background/95 supports-[backdrop-filter]:bg-background/60 relative h-full rounded-xl border shadow-lg backdrop-blur transition-all duration-300 ease-in-out ${
+        className={`sidebar artist-bg supports-[backdrop-filter]:bg-background/60 relative h-full rounded-xl border shadow-lg backdrop-blur transition-all duration-300 ease-in-out ${
           isCollapsed ? "w-[70px]" : "w-[240px]"
         }`}
       >
@@ -162,7 +162,7 @@ export function Sidebar() {
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <span className="font-semibold whitespace-nowrap">
+                    <span className="text-primary font-semibold whitespace-nowrap">
                       Play-Music
                     </span>
                   </motion.div>
@@ -190,7 +190,7 @@ export function Sidebar() {
                   variant="ghost"
                   className={`hover:bg-accent relative h-9 overflow-hidden rounded-md px-0 ${
                     isCollapsed ? "w-9" : "w-full"
-                  } ${isActive ? "bg-secondary hover:bg-secondary" : ""}`}
+                  } ${isActive ? "bg-primary hover:bg-primary text-primary-foreground" : ""}`}
                   asChild
                 >
                   <Link href={item.href}>

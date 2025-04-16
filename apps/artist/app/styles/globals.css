@@ -1,10 +1,103 @@
 @import "tailwindcss";
 
-@theme {
-  /* Define theme variables if needed */
+@layer base {
+  :root {
+    --background: 22 38% 96%; /* F8F3F2 */
+    --foreground: 240 10% 3.9%;
+
+    --primary: 16 84% 56%; /* F2622D - orange */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 35 84% 56%; /* F2A62D - yellow */
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%; /* 0F0F0F */
+    --foreground: 0 0% 98%;
+
+    --primary: 16 84% 56%; /* F2622D - orange */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 35 84% 56%; /* F2A62D - yellow */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
 }
 
-body {
-  /* Add base body styles */
-  @apply bg-gray-100; /* Example background */
+/* Sidebar styling */
+.sidebar {
+  background-color: var(--background);
+  border-right-width: 1px;
+  border-color: var(--border);
+  /* Add other @apply classes if needed, e.g., @apply shadow-lg backdrop-blur; */
+}
+
+/* Create a styled background with the orange and yellow blend */
+.artist-bg {
+  @apply relative overflow-hidden;
+}
+
+.artist-bg::before {
+  content: "";
+  @apply absolute -z-10 h-96 w-96 rounded-full opacity-20 blur-3xl;
+  background: radial-gradient(
+    circle,
+    hsl(16, 84%, 56%) 0%,
+    hsl(35, 84%, 56%) 100%
+  );
+  top: 10%;
+  right: -10%;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    /* Resetting default border width for all elements might be too broad, adjust if necessary */
+    /* border-width: 1px; */
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    /* Add other base body styles via @apply if desired */
+  }
 }
