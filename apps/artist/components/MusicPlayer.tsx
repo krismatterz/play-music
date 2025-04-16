@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 
 interface PlayerProps {
   className?: string;
@@ -18,9 +18,9 @@ interface Song {
 const MusicPlayer: React.FC<PlayerProps> = ({ className }) => {
   // Component implementation goes here...
   // (Your existing implementation)
-  
+
   return (
-    <div className={`music-player ${className || ''}`}>
+    <div className={`music-player ${className ?? ""}`}>
       {/* Your player UI */}
       <div className="music-player-content">
         <h3>Music Player</h3>

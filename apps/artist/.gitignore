@@ -14,12 +14,15 @@
 db.sqlite
 
 # next.js
+.next
 /.next/
 /out/
 next-env.d.ts
 
 # production
 /build
+bun.lockb
+bun.lock
 
 # misc
 .DS_Store

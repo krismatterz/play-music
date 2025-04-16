@@ -1,9 +1,9 @@
-import { type ClassValue, clsx } from "clsx";
+import { clsx } from "clsx";
+import type { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]): string {
-  const classes = clsx(inputs) as string;
-  return twMerge(classes) as string;
+  return twMerge(clsx(...inputs)) as string;
 }
 
 export function absoluteUrl(path: string): string {
