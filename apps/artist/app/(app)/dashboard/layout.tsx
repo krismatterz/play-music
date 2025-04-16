@@ -1,7 +1,6 @@
 import React from "react";
-import Sidebar from "../../components/Sidebar";
-import MusicPlayer from "../../components/MusicPlayer";
-import type DashboardLayout from "./DashboardLayout";
+import Sidebar from "components/Sidebar";
+import MusicPlayer from "components/MusicPlayer";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -19,4 +18,4 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   );
 };
 
-export default DashboardLayout;
+export default MainLayout;
