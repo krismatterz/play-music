@@ -4,6 +4,12 @@
 /node_modules
 /.pnp
 .pnp.js
+.next
+bun
+.bun
+.bun.lock
+bun.lockb
+bun.lock
 
 # testing
 /coverage
