@@ -1,9 +1,9 @@
 "use client";
 
-import { SignUp } from "@clerk/nextjs";
+import { SignIn } from "@clerk/nextjs";
 import Link from "next/link";
 
-export default function RegisterPage() {
+export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-br from-[#F2622D] to-[#F2A62D]">
       <div className="w-full max-w-md space-y-8 rounded-lg bg-black/80 p-8 shadow-xl backdrop-blur-md">
@@ -12,15 +12,15 @@ export default function RegisterPage() {
             Play
           </Link>
           <h2 className="mt-6 text-center text-3xl font-bold text-white">
-            Sign Up
+            Sign In
           </h2>
           <p className="mt-2 text-center text-sm text-gray-300">
-            Create your artist account
+            Sign in to your artist account
           </p>
         </div>
 
         <div className="mt-8 flex justify-center">
-          <SignUp
+          <SignIn
             appearance={{
               elements: {
                 formButtonPrimary:
@@ -38,10 +38,8 @@ export default function RegisterPage() {
                 dividerText: "text-gray-300 bg-black/80",
               },
             }}
-            routing="path"
-            path="/sign-up"
             redirectUrl="/dashboard"
-            signInUrl="/sign-in"
+            signUpUrl="/sign-up"
           />
         </div>
       </div>

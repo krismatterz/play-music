@@ -1,6 +1,6 @@
 "use client";
 
-import Sidebar from "../../components/Sidebar";
+import { Sidebar } from "../../components/Sidebar";
 import MusicPlayer from "../../components/MusicPlayer";
 import { useState } from "react";
 
