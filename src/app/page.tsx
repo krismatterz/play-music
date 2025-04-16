@@ -17,32 +17,60 @@ import {
 
 // Hero background component with animated elements
 const HeroBackground: React.FC = () => {
+  // Store the random positions and sizes for circles in state so they are only generated on the client
+  const [circles, setCircles] = useState<{
+    left: string;
+    top: string;
+    width: string;
+    height: string;
+    animationDuration: string;
+    animationDelay: string;
+    animationTimingFunction: string;
+    animationIterationCount: string;
+    animationDirection: string;
+    animationName: string;
+  }[]>([]);
+
+  useEffect(() => {
+    // Only runs on client
+    const generated = Array.from({ length: 12 }).map((_, i) => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      width: `${Math.random() * 400 + 100}px`,
+      height: `${Math.random() * 400 + 100}px`,
+      animationDuration: `${Math.random() * 10 + 10}s`,
+      animationDelay: `${Math.random() * 5}s`,
+      animationTimingFunction: 'ease-in-out',
+      animationIterationCount: 'infinite',
+      animationDirection: 'alternate',
+      animationName: i % 2 === 0 ? 'float1' : 'float2',
+    }));
+    setCircles(generated);
+  }, []);
+
   return (
     <div className="absolute inset-0 overflow-hidden -z-10">
       <div className="absolute inset-0 bg-gradient-to-br from-black via-violet-950 to-black"></div>
-      
+
       {/* Animated circles */}
       <div className="absolute inset-0 opacity-30">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-gradient-to-br from-emerald-500/20 to-violet-500/20 blur-3xl"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              width: `${Math.random() * 400 + 100}px`,
-              height: `${Math.random() * 400 + 100}px`,
-              animationDuration: `${Math.random() * 10 + 10}s`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationTimingFunction: 'ease-in-out',
-              animationIterationCount: 'infinite',
-              animationDirection: 'alternate',
-              animationName: i % 2 === 0 ? 'float1' : 'float2',
-            }}
-          />
-        ))}
+        {circles.length
+          ? circles.map((style, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-gradient-to-br from-emerald-500/20 to-violet-500/20 blur-3xl"
+                style={style}
+              />
+            ))
+          : Array.from({ length: 12 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-gradient-to-br from-emerald-500/20 to-violet-500/20 blur-3xl"
+                style={{ left: '50%', top: '50%', width: '200px', height: '200px' }}
+              />
+            ))}
       </div>
-      
+
       {/* Sound wave effect */}
       <div className="absolute bottom-0 left-0 right-0 h-32 opacity-20">
         {Array.from({ length: 40 }).map((_, i) => (
@@ -62,7 +90,7 @@ const HeroBackground: React.FC = () => {
           />
         ))}
       </div>
-      
+
       <style jsx global>{`
         @keyframes float1 {
           0% { transform: translate(0, 0) scale(1); }
