@@ -52,7 +52,7 @@ const HeroBackground: React.FC = () => {
 
   return (
     <div className="absolute inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-violet-950 to-black"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-amber-950 to-black"></div>
 
       {/* Animated circles */}
       <div className="absolute inset-0 opacity-30">
@@ -60,14 +60,14 @@ const HeroBackground: React.FC = () => {
           ? circles.map((style, i) => (
               <div
                 key={i}
-                className="absolute rounded-full bg-gradient-to-br from-emerald-500/20 to-violet-500/20 blur-3xl"
+                className="absolute rounded-full bg-gradient-to-br from-amber-700/20 to-amber-300/20 blur-3xl"
                 style={style}
               />
             ))
           : Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
-                className="absolute rounded-full bg-gradient-to-br from-emerald-500/20 to-violet-500/20 blur-3xl"
+                className="absolute rounded-full bg-gradient-to-br from-amber-700/20 to-amber-300/20 blur-3xl"
                 style={{
                   left: "50%",
                   top: "50%",
@@ -146,7 +146,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       whileHover={{ y: -5, scale: 1.02 }}
       className="flex flex-col items-start rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg"
     >
-      <div className="mb-4 rounded-lg bg-gradient-to-br from-violet-500 to-emerald-500 p-3">
+      <div className="mb-4 rounded-lg bg-gradient-to-br from-amber-700 to-amber-300 p-3">
         {icon}
       </div>
       <h3 className="mb-2 text-xl font-bold">{title}</h3>
@@ -194,11 +194,11 @@ const AppPreview: React.FC = () => {
       style={{ transformStyle: "preserve-3d" }}
     >
       {/* App interface mockup */}
-      <div className="bg-gradient-to-b from-violet-950 to-black p-4">
+      <div className="bg-gradient-to-b from-amber-950 to-black p-4">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <IconPlayerPlay size={18} className="text-emerald-500" />
-            <span className="text-sm font-medium text-white">play</span>
+            <IconPlayerPlay size={18} className="text-amber-700" />
+            <span className="text-sm font-medium text-white">Play</span>
           </div>
           <div className="h-6 w-24 rounded-full bg-white/10"></div>
         </div>
@@ -206,12 +206,12 @@ const AppPreview: React.FC = () => {
         {/* Currently playing */}
         <div className="mb-4 rounded-lg bg-white/5 p-3">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded bg-gradient-to-br from-emerald-500 to-violet-500"></div>
+            <div className="h-12 w-12 rounded bg-gradient-to-br from-amber-600 to-amber-300"></div>
             <div>
               <div className="text-sm font-medium text-white">
                 Currently Playing
               </div>
-              <div className="text-xs text-neutral-400">Artist Name</div>
+              <div className="text-xs text-neutral-400">Eladio Carrión</div>
             </div>
           </div>
         </div>
@@ -232,8 +232,8 @@ const AppPreview: React.FC = () => {
         ))}
 
         {/* AI suggestion */}
-        <div className="mt-4 rounded-lg bg-gradient-to-r from-violet-900/30 to-emerald-900/30 p-3">
-          <div className="mb-1 text-xs font-medium text-emerald-400">
+        <div className="mt-4 rounded-lg bg-gradient-to-r from-amber-900/30 to-amber-300/30 p-3">
+          <div className="mb-1 bg-gradient-to-r from-purple-600 via-amber-600 via-15% to-amber-300 bg-clip-text text-xs font-bold text-transparent">
             AI SUGGESTION
           </div>
           <div className="text-sm text-white">
@@ -256,8 +256,8 @@ const Navbar: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="flex items-center gap-2"
         >
-          <IconPlayerPlay size={28} className="text-emerald-500" />
-          <span className="text-xl font-bold text-white">play</span>
+          <IconPlayerPlay size={28} className="text-amber-700" />
+          <span className="text-xl font-bold text-white">Play</span>
         </motion.div>
 
         <div className="flex gap-4">
@@ -278,9 +278,9 @@ const Navbar: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="rounded-full bg-emerald-500 px-4 py-2 text-sm text-white transition-colors hover:bg-emerald-600"
+            className="rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-4 py-2 text-sm text-white transition-colors hover:bg-amber-600"
           >
-            Get Started
+            <Link href="/player">Play Music</Link>
           </motion.button>
         </div>
       </div>
@@ -306,52 +306,45 @@ export default function HomePage() {
                 transition={{ duration: 0.7 }}
                 className="lg:w-1/2"
               >
-                <div className="mb-4 font-medium text-emerald-400">
+                <div className="mb-4 font-medium text-amber-600">
                   INTRODUCING PLAY
                 </div>
                 <h1 className="mb-6 text-5xl leading-tight font-bold md:text-6xl">
                   The Next Generation
-                  <span className="bg-gradient-to-r from-emerald-400 to-violet-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-amber-600 to-amber-300 bg-clip-text text-transparent">
                     {" "}
                     Music Experience
                   </span>
                 </h1>
 
                 <p className="mb-8 max-w-lg text-xl text-neutral-300">
-                  AI-powered music discovery, personalized playlists, and
-                  high-definition audio in one beautiful platform.
+                  Discover, enjoy, and interact with music in a new way.
+                  <br />
+                  Play Dance, Latin, Amapiano & Rap music.
+                  <br />
+                  <br />
+                  Feeling in the mood for something specific?
                 </p>
 
                 <div className="flex flex-wrap gap-4">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-violet-500 px-6 py-3 font-medium text-white transition-all hover:shadow-lg"
+                    className="flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-6 py-3 font-medium text-white transition-all hover:shadow-lg"
                   >
-                    Get Started <IconArrowRight size={18} />
+                    <Link href="/player" className="flex items-center gap-2">
+                      Play Music <IconArrowRight size={18} />
+                    </Link>
                   </motion.button>
 
-                  <motion.button
+                  {/* Not active: Demo button */}
+                  {/* <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="rounded-full border border-white/20 bg-white/10 px-6 py-3 font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
                   >
                     Watch Demo
-                  </motion.button>
-                </div>
-
-                <div className="mt-12 flex items-center gap-6">
-                  <div className="flex">
-                    <div className="h-8 w-8 rounded-full border-2 border-black bg-white"></div>
-                    <div className="-ml-2 h-8 w-8 rounded-full border-2 border-black bg-white"></div>
-                    <div className="-ml-2 h-8 w-8 rounded-full border-2 border-black bg-white"></div>
-                    <div className="-ml-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-emerald-500 text-xs font-bold">
-                      +5k
-                    </div>
-                  </div>
-                  <div className="text-sm text-neutral-300">
-                    Joined this month
-                  </div>
+                  </motion.button> */}
                 </div>
               </motion.div>
 
@@ -463,7 +456,7 @@ export default function HomePage() {
         {/* CTA Section */}
         <section className="py-20">
           <div className="container mx-auto px-4">
-            <div className="rounded-2xl bg-gradient-to-r from-violet-900/30 to-emerald-900/30 p-12 backdrop-blur-lg">
+            <div className="rounded-2xl bg-gradient-to-r from-amber-900/30 to-amber-300/30 p-12 backdrop-blur-lg">
               <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
                 <div>
                   <h2 className="mb-4 text-3xl font-bold">
@@ -478,7 +471,7 @@ export default function HomePage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full bg-gradient-to-r from-emerald-500 to-violet-500 px-8 py-4 text-lg font-medium text-white transition-all hover:shadow-lg"
+                  className="rounded-full bg-gradient-to-r from-amber-500 to-amber-300 px-8 py-4 text-lg font-medium text-white transition-all hover:shadow-lg"
                 >
                   Get Started Free
                 </motion.button>
@@ -494,10 +487,10 @@ export default function HomePage() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div>
               <div className="mb-4 flex items-center gap-2">
-                <IconPlayerPlay size={24} className="text-emerald-500" />
+                <IconPlayerPlay size={24} className="text-amber-500" />
                 <span className="text-xl font-bold text-white">play</span>
               </div>
-              <p className="text-sm text-neutral-400">
+              <p className="text-sm text-white">
                 The next generation music platform with AI-powered discovery and
                 HD audio.
               </p>
@@ -505,7 +498,7 @@ export default function HomePage() {
 
             <div>
               <h3 className="mb-4 font-bold text-white">Platform</h3>
-              <ul className="space-y-2 text-neutral-400">
+              <ul className="space-y-2 text-white">
                 <li>
                   <Link href="#" className="transition-colors hover:text-white">
                     Features
@@ -531,20 +524,10 @@ export default function HomePage() {
 
             <div>
               <h3 className="mb-4 font-bold text-white">Company</h3>
-              <ul className="space-y-2 text-neutral-400">
+              <ul className="space-y-2 text-white">
                 <li>
                   <Link href="#" className="transition-colors hover:text-white">
                     About
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="transition-colors hover:text-white">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="transition-colors hover:text-white">
-                    Careers
                   </Link>
                 </li>
                 <li>
@@ -557,7 +540,7 @@ export default function HomePage() {
 
             <div>
               <h3 className="mb-4 font-bold text-white">Legal</h3>
-              <ul className="space-y-2 text-neutral-400">
+              <ul className="space-y-2 text-white">
                 <li>
                   <Link href="#" className="transition-colors hover:text-white">
                     Terms
@@ -573,44 +556,33 @@ export default function HomePage() {
                     Cookies
                   </Link>
                 </li>
-                <li>
-                  <Link href="#" className="transition-colors hover:text-white">
-                    Licenses
-                  </Link>
-                </li>
               </ul>
             </div>
           </div>
 
           <div className="mt-8 flex flex-col items-center justify-between border-t border-white/10 pt-8 md:flex-row">
-            <div className="text-sm text-neutral-400">
-              {new Date().getFullYear()} Play Music. All rights reserved.
+            <div className="text-sm text-white">
+              {new Date().getFullYear()} &copy; Play-Music. All rights reserved.
             </div>
 
             <div className="mt-4 flex gap-4 md:mt-0">
               <Link
-                href="#"
-                className="text-neutral-400 transition-colors hover:text-white"
+                href="https://github.com/krismatterz"
+                className="text-white transition-colors hover:text-white"
               >
-                Twitter
+                GitHub
               </Link>
               <Link
-                href="#"
-                className="text-neutral-400 transition-colors hover:text-white"
+                href="https://x.com/krismatterz"
+                className="text-white transition-colors hover:text-white"
+              >
+                X/Twitter
+              </Link>
+              <Link
+                href="https://www.instagram.com/krismatterz"
+                className="text-white transition-colors hover:text-white"
               >
                 Instagram
-              </Link>
-              <Link
-                href="#"
-                className="text-neutral-400 transition-colors hover:text-white"
-              >
-                LinkedIn
-              </Link>
-              <Link
-                href="#"
-                className="text-neutral-400 transition-colors hover:text-white"
-              >
-                Facebook
               </Link>
             </div>
           </div>
