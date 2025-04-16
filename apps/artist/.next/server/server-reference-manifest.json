@@ -1,5 +1,17 @@
 {
-  "node": {},
+  "node": {
+    "7ff5d56d69e55e7988f3de1f69d08ca44e40620474": {
+      "workers": {
+        "app/(app)/page": {
+          "moduleId": "[project]/apps/artist/.next-internal/server/app/(app)/page/actions.js { ACTIONS_MODULE0 => \"[project]/node_modules/@clerk/nextjs/dist/esm/app-router/server-actions.js [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/(app)/page": "action-browser"
+      }
+    }
+  },
   "edge": {},
-  "encryptionKey": "y8XX3iL50/dFjnL3+HCUk+CKBZssrhafPCYp6x2Ws3k="
+  "encryptionKey": "EJ+KbNGwGW3jp3E4liIuOY6DzDQsNzhuuLfgKS6StTw="
 }
