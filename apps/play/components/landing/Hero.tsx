@@ -87,14 +87,14 @@ const AppPreview: React.FC = () => {
 
 const Hero: React.FC = () => {
   return (
-    <section className="min-h-screen pt-32 pb-20">
+    <section className="min-h-screen pt-60 pb-20">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center justify-between gap-12 lg:flex-row">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="lg:w-1/2"
+            className="lg:w-1/2 lg:pl-36"
           >
             <div className="mb-4 font-medium text-amber-600">
               INTRODUCING PLAY
