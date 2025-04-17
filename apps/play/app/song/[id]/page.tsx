@@ -19,7 +19,7 @@ const songs = [
     releaseYear: 2023,
     genres: ["Reggaeton", "Latin Trap"],
     lyrics:
-      "Yo sigo aquí, invencible...\nNadie me puede parar...\nSiempre llego a la meta...",
+      "Yeah\nYo me siento invencible cada ve' que abro mis fuckin' dos ojo'\nNunca me gustó el deporte en equipo, puedo solo\nTengo frío en mi alma, junio en Palermo Soho\nCreo mucho en el karma y que con calma llega solo\nEsto fue cero suerte, trabajé y se me dio\nNo me digan \"rey del trap\", solo existe un rey, es Dios\nAprendí que no todo el dinero es bueno\nY 'toy haciendo lo mejor que puedo con el don que me regaló\nUn día hablé con Él, yo ni lo busqué, Él me llamó\nMe dijo: \"Tú ere' el más duro, eso te lo aseguro yo\"\nY desde ese día yo no he vuelto a coger lucha\nAunque a vece' no responde, sé que siempre me escucha\nDice: \"Eladio, no, tú no te deje'\nTú ere' un guerrero, no hay quien te aconseje\nY se pasa por cosa', pero mírate ahora\nTú aguanta' lo que sea, no te la puse difícil, yo te puse a ti más fuerte\", yeah\n\nY ya me siento como Hércule'\nRecuerdo cuando yo le dije a papi: \"Lo logré\"\nTodo esto yo lo fríamente calculé\nPero sobre todo, tuve fe",
   },
   {
     id: "1",
