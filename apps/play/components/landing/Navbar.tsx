@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { IconPlayerPlay } from "@tabler/icons-react";
+import { IconPlayerPlay, IconUser } from "@tabler/icons-react";
 import React from "react";
 import Image from "next/image";
 
@@ -72,19 +72,23 @@ const Navbar: React.FC = () => {
           <IconPlayerPlay size={28} className="text-amber-700" />
           <span className="text-xl font-bold text-white">Play</span>
         </div>
-        <div className="flex items-center gap-4">
-          <button className="group relative overflow-hidden rounded-full bg-[#F8F3F2] px-4 py-2 text-sm font-semibold text-black shadow-sm transition-all">
-            <span className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-200 group-hover:bg-gradient-to-r group-hover:from-purple-800 group-hover:to-amber-600 group-hover:opacity-100" />
-            <span className="relative z-10 transition-colors duration-200 group-hover:bg-clip-text group-hover:text-transparent group-hover:text-white">
+        <div className="flex items-center gap-6">
+          {/* Artist Dashboard Button */}
+          <div className="group relative rounded-full bg-white/10 p-[2px] transition-all hover:bg-gradient-to-r hover:from-purple-800 hover:to-amber-600">
+            <button className="relative z-10 flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all">
+              <IconUser size={16} className="text-white" />
               <Link
                 href={ARTIST_DASHBOARD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="relative z-10"
               >
                 Artist Dashboard
               </Link>
-            </span>
-          </button>
+            </button>
+            {/* Optional: Add a pseudo-element for extra shine */}
+            <span className="pointer-events-none absolute inset-0 rounded-full" />
+          </div>
 
           <div className="relative flex items-center">
             {/* Animated music notes for Play Music button */}
@@ -114,7 +118,10 @@ const Navbar: React.FC = () => {
               ref={playMusicBtnRef}
               className="rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-6 py-2 text-sm font-bold text-white shadow-lg transition-all hover:from-amber-800 hover:to-amber-500 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none"
             >
-              <Link href="/player">Play Music</Link>
+              <span className="flex items-center gap-2">
+                <IconPlayerPlay size={16} />
+                <Link href="/player">Play Music</Link>
+              </span>
             </button>
           </div>
         </div>
