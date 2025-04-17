@@ -14,11 +14,7 @@ import {
   IconBrain,
   IconArrowRight,
 } from "@tabler/icons-react";
-
-const ARTIST_DASHBOARD_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://artist.play-music.app/dashboard"
-    : "http://localhost:3001/dashboard";
+import Navbar from "../components/ui/Navbar";
 
 // Hero background component with animated elements
 const HeroBackground: React.FC = () => {
@@ -247,48 +243,6 @@ const AppPreview: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-// Navbar component
-const Navbar: React.FC = () => {
-  return (
-    <nav className="fixed top-0 right-0 left-0 z-50 bg-black/10 backdrop-blur-xl">
-      <div className="container mx-auto flex items-center justify-between px-4 py-4">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center gap-2"
-        >
-          <IconPlayerPlay size={28} className="text-amber-700" />
-          <span className="text-xl font-bold text-white">Play</span>
-        </motion.div>
-
-        <div className="flex gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="rounded-full border border-amber-700 bg-transparent px-4 py-2 text-sm text-white transition-colors hover:bg-amber-900/40"
-          >
-            <Link
-              href={ARTIST_DASHBOARD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Artist Dashboard
-            </Link>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-4 py-2 text-sm text-white transition-colors hover:bg-amber-600"
-          >
-            <Link href="/player">Play Music</Link>
-          </motion.button>
-        </div>
-      </div>
-    </nav>
   );
 };
 
