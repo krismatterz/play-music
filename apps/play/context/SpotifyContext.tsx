@@ -39,6 +39,8 @@ type SpotifyContextType = {
 
 const SpotifyContext = createContext<SpotifyContextType | undefined>(undefined);
 
+export { SpotifyContext };
+
 export function SpotifyProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
