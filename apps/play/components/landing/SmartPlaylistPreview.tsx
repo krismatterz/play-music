@@ -27,6 +27,18 @@ const playlist = [
     cover: "/landing/Bélee_frente_al_mar_Cover.png",
     duration: "2:45",
   },
+  {
+    title: "Me porto Bonito",
+    artist: "Bad Bunny",
+    cover: "/landing/Bad_Bunny_Me_porto_Bonito_Cover.png",
+    duration: "3:25",
+  },
+  {
+    title: "No me porto bonito",
+    artist: "Bad Bunny",
+    cover: "/landing/Bad_Bunny_No_me_porto_bonito_Cover.png",
+    duration: "2:45",
+  },
 ];
 
 const SmartPlaylistPreview: React.FC = () => {
