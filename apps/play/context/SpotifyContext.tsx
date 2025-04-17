@@ -8,7 +8,11 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { supabase } from "../../../packages/supabase";
+import {
+  supabase,
+  signInWithSpotify,
+  signOut,
+} from "../../../packages/supabase";
 import { SpotifyWebPlayback } from "../../../packages/supabase/spotify-player";
 import * as spotifyApi from "../../../packages/supabase/spotify";
 import { usePlayer } from "./PlayerContext";
@@ -61,7 +65,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    checkAuth();
+    void checkAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -146,7 +150,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    initializePlayer();
+    void initializePlayer();
 
     return () => {
       if (player) {
@@ -165,7 +169,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
   // Login with Spotify
   const login = useCallback(async () => {
     try {
-      await spotifyApi.signInWithSpotify();
+      await signInWithSpotify();
     } catch (error) {
       console.error("Error signing in with Spotify:", error);
     }
@@ -179,7 +183,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
         setPlayer(null);
       }
 
-      await spotifyApi.signOut();
+      await signOut();
       setIsAuthenticated(false);
       setAccessToken(null);
       setIsPlayerReady(false);

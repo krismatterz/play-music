@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +15,7 @@ import Image from "next/image";
 import Hero from "../components/landing/Hero";
 import { HeroBackground } from "../components/landing/Hero";
 import FeatureCard from "../components/landing/FeatureCard";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   return (

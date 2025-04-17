@@ -30,8 +30,9 @@ const NowPlaying: React.FC = () => {
     const updateProgress = () => {
       if (!spotify.playbackState) return;
 
-      const durationMs = spotify.playbackState.duration;
-      const positionMs = spotify.playbackState.position;
+      // Use type assertion to specify we know the structure
+      const durationMs = spotify.playbackState?.duration as number | undefined;
+      const positionMs = spotify.playbackState?.position as number | undefined;
 
       if (durationMs && positionMs) {
         setProgress((positionMs / durationMs) * 100);
@@ -106,7 +107,8 @@ const NowPlaying: React.FC = () => {
     const width = rect.width;
     const seekPositionPercent = offsetX / width;
 
-    const durationMs = spotify.playbackState.duration;
+    // Use type assertion to specify we know the structure
+    const durationMs = spotify.playbackState?.duration as number;
     const seekPositionMs = Math.floor(durationMs * seekPositionPercent);
 
     await spotify.seek(seekPositionMs);
