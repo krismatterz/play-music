@@ -6,7 +6,7 @@
 
 ## Getting Started
 
-This monorepo contains two Next.js applications built with the [T3 Stack](https://create.t3.gg/), [Bun](https://bun.sh/) for package management, [Supabase](https://supabase.com) for the Database and [Clerk](https://clerk.com) for Auth in [http://localhost:3000](http://localhost:3000) or https://artist.play-music.app
+This monorepo contains two Next.js applications built with the [T3 Stack](https://create.t3.gg/), [Bun](https://bun.sh/) for package management, [Supabase](https://supabase.com) for the Database and [Clerk](https://clerk.com) for Auth
 
 - `apps/play`: The main music platform (runs on `localhost:3000`, maps to `play-music.app`)
 - `apps/artists`: The artist portal (runs on `localhost:3001`, maps to `artist.play-music.app`)
