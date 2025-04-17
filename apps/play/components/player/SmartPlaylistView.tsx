@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import ExplicitBadge from "../ui/ExplicitBadge";
@@ -122,7 +124,7 @@ interface SavedTracksResponse {
   }>;
 }
 
-const SmartPlaylistPreview: React.FC = () => {
+const SmartPlaylistView: React.FC = () => {
   const spotify = useSpotify();
   const [tracks, setTracks] = useState<DisplayTrack[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,6 +142,7 @@ const SmartPlaylistPreview: React.FC = () => {
             ...track,
             uri: "",
             isPlaying: track.isPlaying || false,
+            explicit: track.explicit || false,
           })),
         );
         setLoading(false);
@@ -165,7 +168,7 @@ const SmartPlaylistPreview: React.FC = () => {
               title: item.track.name,
               artist: item.track.artists.map((a) => a.name).join(", "),
               cover:
-                item.track.album.images[0]?.url ?? "/placeholder-cover.png",
+                item.track.album.images[0]?.url || "/placeholder-cover.png",
               duration: formatDuration(item.track.duration_ms),
               isPlaying: false,
               explicit: item.track.explicit,
@@ -179,6 +182,7 @@ const SmartPlaylistPreview: React.FC = () => {
               ...track,
               uri: "",
               isPlaying: track.isPlaying || false,
+              explicit: track.explicit || false,
             })),
           );
         }
@@ -189,7 +193,8 @@ const SmartPlaylistPreview: React.FC = () => {
           fallbackPlaylist.map((track) => ({
             ...track,
             uri: "",
-            isPlaying: track.isPlaying ?? false,
+            isPlaying: track.isPlaying || false,
+            explicit: track.explicit || false,
           })),
         );
       } finally {
@@ -204,7 +209,7 @@ const SmartPlaylistPreview: React.FC = () => {
   useEffect(() => {
     if (spotify.playbackState && spotify.playbackState.track_window) {
       const currentTrack = spotify.playbackState.track_window.current_track;
-      setCurrentlyPlayingUri(currentTrack?.uri ?? null);
+      setCurrentlyPlayingUri(currentTrack?.uri || null);
 
       // Update isPlaying status for all tracks
       setTracks((prevTracks) =>
@@ -231,11 +236,10 @@ const SmartPlaylistPreview: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md rounded-xl bg-gradient-to-b from-amber-900 to-black p-[2.5px] shadow-2xl">
-      <div className="h-full w-full rounded-[0.75rem] bg-black/70 p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 rounded-full bg-black/10 px-2 py-1">
-            {/* Smart AI Icon */}
+    <div className="rounded-xl bg-white/5 shadow-md">
+      <div className="rounded-t-xl bg-gradient-to-r from-amber-900 to-amber-700 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <Image
               src="/landing/Sparkle_AI.svg"
               alt="AI Sparkle"
@@ -244,7 +248,9 @@ const SmartPlaylistPreview: React.FC = () => {
               className="inline-block"
             />
             <span className="text-sm font-medium text-white">
-              {spotify.isAuthenticated ? "Your Library" : "dJai Suggestion"}
+              {spotify.isAuthenticated
+                ? "Your Top Tracks"
+                : "Recommended Tracks"}
             </span>
           </div>
           {spotify.isAuthenticated ? null : (
@@ -256,53 +262,66 @@ const SmartPlaylistPreview: React.FC = () => {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="p-2">
         {loading ? (
           <div className="flex justify-center py-6">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
           </div>
         ) : (
-          tracks.map((track, i) => (
-            <div
-              key={track.title + i}
-              className={`flex cursor-pointer items-center gap-3 py-3 ${i < tracks.length - 1 ? "border-b border-white/5" : ""} ${track.isPlaying ? "mb-2 rounded-lg bg-white/5 p-2" : ""}`}
-              onClick={() => handleTrackClick(track)}
-            >
-              <Image
-                src={track.cover}
-                alt={track.title + " cover"}
-                width={track.isPlaying ? 48 : 40}
-                height={track.isPlaying ? 48 : 40}
-                className={`rounded ${track.isPlaying ? "h-12 w-12" : "h-10 w-10"}`}
-              />
-              <div>
-                <div
-                  className={`flex items-center text-sm font-medium text-white ${track.isPlaying ? "" : "text-xs"}`}
-                >
-                  {track.title}
-                  {track.explicit && <ExplicitBadge />}
+          <div className="divide-y divide-white/5">
+            {tracks.map((track, i) => (
+              <div
+                key={track.title + i}
+                className={`flex cursor-pointer items-center gap-3 p-3 ${track.isPlaying ? "bg-white/5" : "hover:bg-white/5"}`}
+                onClick={() => handleTrackClick(track)}
+              >
+                <div className="flex w-8 items-center justify-center font-mono text-sm text-neutral-400">
+                  {track.isPlaying ? (
+                    <div className="h-3 w-3 animate-pulse rounded-full bg-green-500"></div>
+                  ) : (
+                    i + 1
+                  )}
                 </div>
-                <div className="text-xs text-neutral-400">{track.artist}</div>
+
+                <Image
+                  src={track.cover}
+                  alt={track.title + " cover"}
+                  width={40}
+                  height={40}
+                  className="rounded shadow"
+                />
+
+                <div className="flex-1 overflow-hidden">
+                  <div
+                    className={`flex items-center truncate text-sm font-medium text-white ${track.isPlaying ? "text-green-500" : ""}`}
+                  >
+                    {track.title}
+                    {track.explicit && <ExplicitBadge />}
+                  </div>
+                  <div className="truncate text-xs text-neutral-400">
+                    {track.artist}
+                  </div>
+                </div>
+
+                <div className="text-xs text-neutral-400">{track.duration}</div>
               </div>
-              <div className="ml-auto text-xs text-neutral-400">
-                {track.duration}
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
-        {/* AI Feature */}
-        <div className="mt-4 rounded-lg bg-gradient-to-r from-amber-800/40 to-black/5 p-3">
-          <div className="mb-1 bg-gradient-to-r from-purple-600 via-amber-600 via-15% to-amber-300 bg-clip-text text-xs font-bold text-transparent">
-            AI Feature
-          </div>
-          <div className="text-sm text-white">
-            {spotify.isAuthenticated
-              ? "Personalized recommendations based on your library"
-              : "New songs that you might like"}
-          </div>
+
+        <div className="mt-2 p-3 text-center">
+          <button
+            onClick={() => (spotify.isAuthenticated ? null : spotify.login())}
+            className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20"
+          >
+            {spotify.isAuthenticated ? "View All" : "Sign in to view more"}
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default SmartPlaylistPreview;
+export default SmartPlaylistView;
