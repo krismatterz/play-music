@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import NowPlaying from "../../components/ui/NowPlaying";
 import PlaylistItem from "../../components/ui/PlaylistItem";
 import { useState, useEffect } from "react";
+import { usePlayer } from "../../context/PlayerContext";
 
 // Mock data for the playlist
 const playlist = [
   {
+    id: "0",
     title: "Invencible",
     artist: "Eladio Carrión",
     album: "DON KBRN",
@@ -16,6 +17,7 @@ const playlist = [
     explicit: true,
   },
   {
+    id: "1",
     title: "Weightless",
     artist: "Martin Garrix",
     album: "Weightless - Single",
@@ -23,6 +25,7 @@ const playlist = [
     duration: "3:43",
   },
   {
+    id: "2",
     title: "Thana",
     artist: "Tayna",
     album: "Thana - Single",
@@ -30,6 +33,7 @@ const playlist = [
     duration: "3:25",
   },
   {
+    id: "3",
     title: "frente al mar",
     artist: "Béele",
     album: "frente al mar - EP",
@@ -37,6 +41,7 @@ const playlist = [
     duration: "2:45",
   },
   {
+    id: "4",
     title: "PERFuMITO NUEVO",
     artist: "Bad Bunny",
     album: "DONDE TM FANTASMA",
@@ -45,6 +50,7 @@ const playlist = [
     explicit: true,
   },
   {
+    id: "5",
     title: "Work",
     artist: "Anyma",
     album: "Work - Single",
@@ -57,9 +63,24 @@ const playlist = [
 export default function Player() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const { setCurrentTrack } = usePlayer();
 
   // Make sure currentTrack is always defined
   const currentTrack = playlist[currentTrackIndex] ?? playlist[0];
+
+  // Set the current track in context when it changes
+  useEffect(() => {
+    if (currentTrack) {
+      setCurrentTrack({
+        title: currentTrack.title,
+        artist: currentTrack.artist,
+        cover: currentTrack.cover,
+        duration: currentTrack.duration,
+        explicit: currentTrack.explicit,
+        album: currentTrack.album,
+      });
+    }
+  }, [currentTrack, setCurrentTrack]);
 
   const handleTrackClick = (index: number) => {
     setCurrentTrackIndex(index);
@@ -185,6 +206,7 @@ export default function Player() {
               index={index + 1}
               isPlaying={index === currentTrackIndex && isPlaying}
               onClick={() => handleTrackClick(index)}
+              songId={track.id}
             />
           ))}
         </div>

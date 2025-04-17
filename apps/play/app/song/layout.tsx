@@ -4,7 +4,7 @@ import React from "react";
 import NowPlaying from "../../components/ui/NowPlaying";
 import Link from "next/link";
 
-export default function PlayerLayout({
+export default function SongLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -31,7 +31,7 @@ export default function PlayerLayout({
               </a>
               <Link
                 href="/player"
-                className="block rounded bg-white/10 px-3 py-2 font-medium text-white"
+                className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
               >
                 Player
               </Link>
