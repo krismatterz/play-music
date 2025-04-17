@@ -3,8 +3,8 @@
 @custom-variant dark (&:is(.dark *));
 
 body {
-  /* Add base body styles */
-  @apply bg-black text-white;
+  background: #111827;
+  color: #fff;
 }
 
 @layer base {

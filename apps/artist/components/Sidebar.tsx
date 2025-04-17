@@ -25,14 +25,6 @@ import {
 import { ScrollArea } from "./ui/scroll-area";
 import { Skeleton } from "./ui/skeleton";
 
-// Helper function to get initial state safely on client
-const getInitialCollapsedState = () => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("sidebarCollapsed") === "true";
-  }
-  return false; // Default server/initial state
-};
-
 // Navigation items are static and memoized outside component
 interface SidebarItem {
   title: string;
@@ -69,19 +61,18 @@ export function Sidebar() {
   const { signOut: clerkSignOut } = useClerk();
   const { isLoaded } = useUser();
 
-  // Initialize state directly if possible on client
-  const [isCollapsed, setIsCollapsed] = useState(getInitialCollapsedState());
+  // Initialize state to default 'false' matching server render.
+  // localStorage will be checked client-side after mount.
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // useEffect to confirm client-side state AFTER mount - Runs only once
+  // useEffect to read persisted state from localStorage AFTER initial mount
   useEffect(() => {
-    // Read state again after mount to be sure
     const savedState = localStorage.getItem("sidebarCollapsed") === "true";
-    // Only update if the initial guess was wrong
-    if (savedState !== isCollapsed) {
-      setIsCollapsed(savedState);
-    }
-  }, [isCollapsed]);
+    // Update the state based on localStorage value after hydration
+    setIsCollapsed(savedState);
+    // Empty dependency array ensures this runs only once on the client after mount
+  }, []);
 
   // Handler to toggle collapse state and save to localStorage
   const handleToggleCollapse = useCallback(() => {
@@ -111,7 +102,8 @@ export function Sidebar() {
           className="h-full max-w-xs items-stretch rounded-xl border border-neutral-700 bg-black"
         >
           <ResizablePanel
-            defaultSize={isCollapsed ? 4 : 20}
+            key={isCollapsed ? "sidebar-collapsed" : "sidebar-expanded"}
+            defaultSize={20} // Always start expanded (matching server)
             collapsedSize={4}
             collapsible={true}
             minSize={15}

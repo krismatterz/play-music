@@ -56,14 +56,14 @@ export const topTracks: Track[] = [
   },
   {
     title: "Coco Chanel",
-    cover: placeholderCover,
+    cover: "/3MEN2_KBRN_Cover.png",
     duration: "3:28",
     plays: "57.6M",
     explicit: true,
   },
   {
     title: "Chulx",
-    cover: placeholderCover,
+    cover: "/Lia_Kali_Chulx_Cover.png",
     duration: "3:03",
     plays: "45.3M",
     explicit: true,
@@ -72,9 +72,13 @@ export const topTracks: Track[] = [
 
 export const albums: Album[] = [
   { title: "DON KBRN", cover: placeholderCover, year: 2025 },
-  { title: "Sol María", cover: placeholderCover, year: 2024 },
-  { title: "3MEN2 KBRN", cover: placeholderCover, year: 2023 },
-  { title: "Sauce Boyz 2", cover: placeholderCover, year: 2022 },
+  { title: "Sol María", cover: "/Eladio_Sol_Maria_Cover.png", year: 2024 },
+  { title: "3MEN2 KBRN", cover: "/3MEN2_KBRN_Cover.png", year: 2023 },
+  {
+    title: "Sauce Boyz 2",
+    cover: "/Eladio_Sauce_Boyz_2_Cover.png",
+    year: 2021,
+  },
 ];
 
 export const upcomingEvents: Event[] = [
