@@ -23,12 +23,6 @@ export default function SongLayout({
               Menu
             </h2>
             <div className="space-y-1">
-              <a
-                href="#"
-                className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
-              >
-                Home
-              </a>
               <Link
                 href="/player"
                 className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"

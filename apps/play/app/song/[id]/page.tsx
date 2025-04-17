@@ -16,7 +16,7 @@ const songs = [
     cover: "/landing/Eladio_DON_KBRN_Cover.png",
     duration: "3:24",
     explicit: true,
-    releaseYear: 2023,
+    releaseYear: 2025,
     genres: ["Reggaeton", "Latin Trap"],
     lyrics:
       "Yeah\nYo me siento invencible cada ve' que abro mis fuckin' dos ojo'\nNunca me gustó el deporte en equipo, puedo solo\nTengo frío en mi alma, junio en Palermo Soho\nCreo mucho en el karma y que con calma llega solo\nEsto fue cero suerte, trabajé y se me dio\nNo me digan \"rey del trap\", solo existe un rey, es Dios\nAprendí que no todo el dinero es bueno\nY 'toy haciendo lo mejor que puedo con el don que me regaló\nUn día hablé con Él, yo ni lo busqué, Él me llamó\nMe dijo: \"Tú ere' el más duro, eso te lo aseguro yo\"\nY desde ese día yo no he vuelto a coger lucha\nAunque a vece' no responde, sé que siempre me escucha\nDice: \"Eladio, no, tú no te deje'\nTú ere' un guerrero, no hay quien te aconseje\nY se pasa por cosa', pero mírate ahora\nTú aguanta' lo que sea, no te la puse difícil, yo te puse a ti más fuerte\", yeah\n\nY ya me siento como Hércule'\nRecuerdo cuando yo le dije a papi: \"Lo logré\"\nTodo esto yo lo fríamente calculé\nPero sobre todo, tuve fe",
@@ -28,7 +28,7 @@ const songs = [
     album: "Weightless - Single",
     cover: "/landing/Martin_Garrix_Weightless_Cover.png",
     duration: "3:43",
-    releaseYear: 2022,
+    releaseYear: 2025,
     genres: ["EDM", "Dance"],
     lyrics:
       "Feeling weightless...\nAs we're falling through the sky...\nNothing holding us down...",
@@ -40,8 +40,8 @@ const songs = [
     album: "Thana - Single",
     cover: "/landing/Tayna_Thana_Cover.png",
     duration: "3:25",
-    releaseYear: 2023,
-    genres: ["Pop", "R&B"],
+    releaseYear: 2025,
+    genres: ["Amapiano", "Albanian Pop"],
     lyrics:
       "When the lights go down...\nI'll be there waiting...\nJust call my name...",
   },
@@ -52,7 +52,7 @@ const songs = [
     album: "frente al mar - EP",
     cover: "/landing/Bélee_frente_al_mar_Cover.png",
     duration: "2:45",
-    releaseYear: 2022,
+    releaseYear: 2025,
     genres: ["Latin Pop", "Reggaeton"],
     lyrics:
       "Frente al mar...\nMirando las olas llegar...\nPienso en ti una vez más...",
@@ -65,7 +65,7 @@ const songs = [
     cover: "/landing/Bad_Bunny_DTMF_Cover.png",
     duration: "3:21",
     explicit: true,
-    releaseYear: 2023,
+    releaseYear: 2025,
     genres: ["Latin Trap", "Reggaeton"],
     lyrics:
       "Nuevo perfume, nueva actitud...\nYa no pienso más en tu ingratitud...\nAhora soy yo quien vive su juventud...",
@@ -78,8 +78,8 @@ const songs = [
     cover: "/landing/Anyma_Work_Cover.png",
     duration: "2:54",
     explicit: true,
-    releaseYear: 2022,
-    genres: ["Electronic", "House"],
+    releaseYear: 2025,
+    genres: ["EDM", "Melodic Techno"],
     lyrics:
       "Work, work, work...\nPut in the hours...\nNever stop until we reach the top...",
   },
