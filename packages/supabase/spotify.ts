@@ -308,3 +308,8 @@ export async function transferPlayback(deviceId: string, play: boolean = true) {
     }),
   });
 }
+
+// Get current user profile
+export async function getCurrentUserProfile() {
+  return fetchFromSpotify("/me");
+}

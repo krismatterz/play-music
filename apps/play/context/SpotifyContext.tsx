@@ -21,6 +21,7 @@ import { usePlayer } from "./PlayerContext";
 type SpotifyContextType = {
   isAuthenticated: boolean;
   isPlayerReady: boolean;
+  isPremium: boolean;
   deviceId: string | null;
   currentTrack: any | null;
   playbackState: any | null;
@@ -35,6 +36,7 @@ type SpotifyContextType = {
   seek: (positionMs: number) => Promise<void>;
   setVolume: (volumePercent: number) => Promise<void>;
   player?: SpotifyWebPlayback | null;
+  openSpotifyApp: (uri?: string) => void;
 };
 
 const SpotifyContext = createContext<SpotifyContextType | undefined>(undefined);
@@ -44,6 +46,7 @@ export { SpotifyContext };
 export function SpotifyProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [player, setPlayer] = useState<SpotifyWebPlayback | null>(null);
@@ -92,9 +95,38 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     };
   }, [player]);
 
-  // Initialize Spotify player when authenticated
+  // Check if user has premium subscription
   useEffect(() => {
-    if (!isAuthenticated || !accessToken || typeof window === "undefined") {
+    const checkPremiumStatus = async () => {
+      if (!isAuthenticated || !accessToken) return;
+
+      try {
+        // Get current user profile
+        const userProfile = await spotifyApi.getCurrentUserProfile();
+
+        if (userProfile && userProfile.product === "premium") {
+          setIsPremium(true);
+        } else {
+          setIsPremium(false);
+          console.log("Spotify Web Playback SDK requires a Premium account");
+        }
+      } catch (error) {
+        console.error("Failed to check premium status:", error);
+        setIsPremium(false);
+      }
+    };
+
+    void checkPremiumStatus();
+  }, [isAuthenticated, accessToken]);
+
+  // Initialize Spotify player when authenticated AND user has premium
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      !accessToken ||
+      !isPremium ||
+      typeof window === "undefined"
+    ) {
       return;
     }
 
@@ -159,7 +191,13 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
         player.disconnect();
       }
     };
-  }, [isAuthenticated, accessToken, setIsPlaying, setPlayerContextTrack]);
+  }, [
+    isAuthenticated,
+    accessToken,
+    isPremium,
+    setIsPlaying,
+    setPlayerContextTrack,
+  ]);
 
   // Helper function to format duration
   const formatDuration = (durationMs: number): string => {
@@ -195,10 +233,34 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     }
   }, [player]);
 
-  // Play
+  // Function to open the Spotify app (alternative for non-premium users)
+  const openSpotifyApp = useCallback((uri?: string) => {
+    if (!uri) {
+      window.open("https://open.spotify.com", "_blank");
+      return;
+    }
+
+    // Convert any Spotify URI to the open.spotify.com format if needed
+    let webUrl = uri;
+    if (uri.startsWith("spotify:")) {
+      // Replace spotify:track:id with https://open.spotify.com/track/id
+      webUrl = uri.replace("spotify:", "").replace(":", "/");
+      webUrl = `https://open.spotify.com/${webUrl}`;
+    }
+
+    window.open(webUrl, "_blank");
+  }, []);
+
+  // Play function with fallback for non-premium users
   const play = useCallback(
     async (uri?: string, positionMs?: number) => {
       try {
+        if (!isPremium) {
+          // Redirect non-premium users to Spotify
+          openSpotifyApp(uri);
+          return;
+        }
+
         if (player && isPlayerReady) {
           await player.play(uri, positionMs);
         }
@@ -206,7 +268,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
         console.error("Error playing track:", error);
       }
     },
-    [player, isPlayerReady],
+    [player, isPlayerReady, isPremium, openSpotifyApp],
   );
 
   // Pause
@@ -297,6 +359,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
       value={{
         isAuthenticated,
         isPlayerReady,
+        isPremium,
         deviceId,
         currentTrack,
         playbackState,
@@ -311,6 +374,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
         seek,
         setVolume,
         player,
+        openSpotifyApp,
       }}
     >
       {children}
