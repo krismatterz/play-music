@@ -14,7 +14,8 @@ import {
   IconBrain,
   IconArrowRight,
 } from "@tabler/icons-react";
-import Navbar from "../components/ui/Navbar";
+import Navbar from "../components/landing/Navbar";
+import Image from "next/image";
 
 // Hero background component with animated elements
 const HeroBackground: React.FC = () => {
@@ -330,45 +331,46 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
-              <motion.div
-                whileHover={{ y: -5 }}
-                className="flex flex-col items-center"
-              >
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-[#1ED760]">
-                  <IconBrandSpotify size={32} className="text-black" />
+              <div className="flex flex-col items-center">
+                <div className="mb-2 flex h-16 w-16 items-center justify-center">
+                  <Image
+                    src="/platforms/Spotify_Primary_Logo_RGB_Green.png"
+                    alt="Spotify"
+                    width={48}
+                    height={48}
+                  />
                 </div>
-                <span className="text-sm">Spotify</span>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ y: -5 }}
-                className="flex flex-col items-center"
-              >
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-                  <IconBrandApple size={32} className="text-black" />
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="mb-2 flex h-16 w-16 items-center justify-center">
+                  <Image
+                    src="/platforms/Apple_Music_Icon_RGB_sm_073120.svg"
+                    alt="Apple Music"
+                    width={48}
+                    height={48}
+                  />
                 </div>
-                <span className="text-sm">Apple Music</span>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ y: -5 }}
-                className="flex flex-col items-center"
-              >
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
-                  <IconMusic size={32} className="text-white" />
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="mb-2 flex h-24 w-24 items-center justify-center">
+                  <Image
+                    src="/platforms/Deezer_Logo_RVB_White.svg"
+                    alt="Deezer"
+                    width={92}
+                    height={92}
+                  />
                 </div>
-                <span className="text-sm">YouTube Music</span>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ y: -5 }}
-                className="flex flex-col items-center"
-              >
-                <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
-                  <div className="text-xl font-bold text-violet-400">℗</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="mb-2 flex h-24 w-24 items-center justify-center">
+                  <Image
+                    src="/platforms/Amazon_Music_Logo_Horizontal_RGB_White+Music_Cyan_MASTER.svg"
+                    alt="Amazon Music"
+                    width={92}
+                    height={92}
+                  />
                 </div>
-                <span className="text-sm">Pandora</span>
-              </motion.div>
+              </div>
             </div>
           </div>
         </section>
@@ -440,7 +442,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-black/40 py-12 backdrop-blur-md">
+      <footer className="bg-black py-12 backdrop-blur-md">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
             <div>
