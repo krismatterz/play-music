@@ -1,12 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 
 // These will be loaded from environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.warn(
+  console.error(
     "Supabase URL or key not found. Make sure to set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file.",
+  );
+  throw new Error(
+    "Supabase configuration missing. Check your environment variables.",
   );
 }
 
