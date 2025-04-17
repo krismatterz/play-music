@@ -94,7 +94,7 @@ export function loadSpotifyScript(): Promise<void> {
     script.async = true;
 
     script.onload = () => resolve();
-    script.onerror = (error) =>
+    script.onerror = (error: Error) =>
       reject(
         new Error(`Spotify Web Playback SDK script failed to load: ${error}`),
       );
@@ -184,26 +184,32 @@ export class SpotifyWebPlayback {
           });
 
           // Ready
-          this.player.addListener("ready", ({ device_id }) => {
-            this.deviceId = device_id;
-            this.isReady = true;
-            console.log(
-              "Spotify Web Playback SDK ready with Device ID:",
-              device_id,
-            );
-            if (this.onReadyCallback) this.onReadyCallback(device_id);
-          });
+          this.player.addListener(
+            "ready",
+            ({ device_id }: { device_id: string }) => {
+              this.deviceId = device_id;
+              this.isReady = true;
+              console.log(
+                "Spotify Web Playback SDK ready with Device ID:",
+                device_id,
+              );
+              if (this.onReadyCallback) this.onReadyCallback(device_id);
+            },
+          );
 
           // Not ready
-          this.player.addListener("not_ready", ({ device_id }) => {
-            this.deviceId = device_id;
-            this.isReady = false;
-            console.log("Device has gone offline:", device_id);
-            if (this.onNotReadyCallback) this.onNotReadyCallback();
-          });
+          this.player.addListener(
+            "not_ready",
+            ({ device_id }: { device_id: string }) => {
+              this.deviceId = device_id;
+              this.isReady = false;
+              console.log("Device has gone offline:", device_id);
+              if (this.onNotReadyCallback) this.onNotReadyCallback();
+            },
+          );
 
           // Connect to the player
-          this.player.connect().then((success) => {
+          this.player.connect().then((success: boolean) => {
             if (success) {
               console.log("Spotify Web Playback SDK successfully connected!");
             }

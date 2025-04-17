@@ -45,6 +45,46 @@ const playlist = [
   },
 ];
 
+export const AppPreview: React.FC = () => {
+  const previewRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!previewRef.current) return;
+
+      const { left, top, width, height } =
+        previewRef.current.getBoundingClientRect();
+      const x = (e.clientX - left) / width - 0.5;
+      const y = (e.clientY - top) / height - 0.5;
+
+      previewRef.current.style.transform = `perspective(1000px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg)`;
+    };
+
+    const handleMouseLeave = () => {
+      if (!previewRef.current) return;
+      previewRef.current.style.transform =
+        "perspective(1000px) rotateY(0deg) rotateX(0deg)";
+      previewRef.current.style.transition = "transform 0.5s ease";
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={previewRef}
+      className="relative w-full max-w-md overflow-hidden rounded-xl border border-black/20 bg-transparent shadow-2xl transition-transform duration-300 ease-out"
+      style={{ transformStyle: "preserve-3d" }}
+    ></div>
+  );
+};
+
 const SmartPlaylistPreview: React.FC = () => {
   return (
     <div className="w-full max-w-md rounded-xl bg-gradient-to-b from-amber-900 to-black p-[2.5px] shadow-2xl">
@@ -60,7 +100,7 @@ const SmartPlaylistPreview: React.FC = () => {
               className="inline-block"
             />
             <span className="text-sm font-medium text-white">
-              Smart Suggestion
+              dJai Suggestion
             </span>
           </div>
         </div>
@@ -90,10 +130,10 @@ const SmartPlaylistPreview: React.FC = () => {
             </div>
           </div>
         ))}
-        {/* AI suggestion */}
+        {/* AI Feature */}
         <div className="mt-4 rounded-lg bg-gradient-to-r from-amber-800/40 to-black/5 p-3">
           <div className="mb-1 bg-gradient-to-r from-purple-600 via-amber-600 via-15% to-amber-300 bg-clip-text text-xs font-bold text-transparent">
-            AI SUGGESTION
+            AI Feature
           </div>
           <div className="text-sm text-white">
             New songs that you might like
