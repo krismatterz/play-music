@@ -6,33 +6,51 @@
 
 ## Getting Started
 
-This project uses the [T3 Stack](https://create.t3.gg/), [Next.js](https://nextjs.org/), and [Bun](https://bun.sh/).
+This monorepo contains two Next.js applications built with the [T3 Stack](https://create.t3.gg/), [Bun](https://bun.sh/) for package management, [Supabase](https://supabase.com) for the Database and [Clerk](https://clerk.com) for Auth in [http://localhost:3000](http://localhost:3000) or https://artist.play-music.app
+
+- `apps/play`: The main music platform (runs on `localhost:3000`, maps to `play-music.app`)
+- `apps/artists`: The artist portal (runs on `localhost:3001`, maps to `artist.play-music.app`)
 
 1.  **Clone the repository:**
 
     ```bash
-    git clone <your-repo-url>
-    cd <your-repo-directory>
+    git clone <https://github.com/krismatterz/play-music>
+    cd play-music
     ```
 
 2.  **Install dependencies:**
+    From the root of the monorepo:
 
     ```bash
     bun install
     ```
 
 3.  **Set up environment variables:**
-    Copy the `.env.example` file to `.env` and fill in the required values.
+    Each application might have its own environment variables.
 
-    ```bash
-    cp .env.example .env
-    ```
+    - Copy `apps/play/.env.example` to `apps/play/.env` and fill in the values.
+    - Copy `apps/artists/.env.example` to `apps/artists/.env` and fill in the values.
+      Check each `.env.example` file for required variables.
 
-4.  **Run the development server:**
-    ```bash
-    bun run dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4.  **This project uses Supabase:**
+5.  **Run the development servers:**
+    You can run each application concurrently in separate terminals:
+
+    - **To run the `play` app:**
+
+      ```bash
+      # From the root directory
+        cd apps/play && bun run dev
+      ```
+
+      Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+    - **To run the `artists` app:**
+      ```bash
+      # From the root directory
+      cd apps/artists && bun run dev
+      ```
+      Open [http://localhost:3001](http://localhost:3001) in your browser.
 
 ## Resources & Brand Guidelines
 
