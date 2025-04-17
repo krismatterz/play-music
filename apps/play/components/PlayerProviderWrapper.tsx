@@ -2,11 +2,16 @@
 
 import React from "react";
 import { PlayerProvider } from "../context/PlayerContext";
+import { SpotifyProvider } from "../context/SpotifyContext";
 
 export default function PlayerProviderWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <PlayerProvider>{children}</PlayerProvider>;
+  return (
+    <PlayerProvider>
+      <SpotifyProvider>{children}</SpotifyProvider>
+    </PlayerProvider>
+  );
 }
