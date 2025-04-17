@@ -7,6 +7,7 @@ import React, {
   useRef,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import type { ReactNode, SyntheticEvent } from "react";
 import { useSpotify } from "../hooks/useSpotify"; // Assuming SpotifyContext is in the same dir
@@ -57,28 +58,43 @@ export interface DisplayableTrack {
 
 type PlaybackSource = "spotify" | "local" | null;
 
-interface PlayerContextType {
+// --- Context Types (Split) --- //
+
+interface PlayerStateType {
   playbackSource: PlaybackSource;
   currentTrack: DisplayableTrack | null;
   isPlaying: boolean;
-  currentTime: number; // Current playback time in seconds
   duration: number; // Total duration in seconds
   volume: number; // Volume 0-100
+}
 
-  // Actions
+interface PlayerActionsType {
   play: (
     trackInfo:
       | { source: "spotify"; uri: string }
       | { source: "local"; track: DisplayableTrack },
   ) => Promise<void>;
   pause: () => Promise<void>;
-  resume: () => Promise<void>; // Renamed togglePlayPause for clarity
+  resume: () => Promise<void>;
   seek: (timeSeconds: number) => Promise<void>;
   setVolume: (volumePercent: number) => Promise<void>;
-  // Add next/previous if needed later
 }
 
-const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
+interface PlayerProgressType {
+  currentTime: number; // Current playback time in seconds
+}
+
+// --- Context Definitions (Split) --- //
+
+const PlayerStateContext = createContext<PlayerStateType | undefined>(
+  undefined,
+);
+const PlayerActionsContext = createContext<PlayerActionsType | undefined>(
+  undefined,
+);
+const PlayerProgressContext = createContext<PlayerProgressType | undefined>(
+  undefined,
+);
 
 // --- Provider Implementation --- //
 
@@ -86,19 +102,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const spotify = useSpotify();
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Core Playback State
+  // --- State Definitions --- //
+  // State for PlayerStateContext
   const [playbackSource, setPlaybackSource] = useState<PlaybackSource>(null);
   const [currentTrack, setCurrentTrack] = useState<DisplayableTrack | null>(
     null,
   );
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0); // Store time in seconds
   const [duration, setDuration] = useState(0); // Store duration in seconds
   const [volume, setVolume] = useState(50); // Volume 0-100
 
+  // State for PlayerProgressContext
+  const [currentTime, setCurrentTime] = useState(0); // Store time in seconds
+
   // State synchronization from Spotify SDK
   useEffect(() => {
-    // Use the more specific type assertion
     const state = spotify.playbackState as SpotifyPlaybackState | null;
     if (playbackSource !== "spotify" || !state) return;
 
@@ -109,24 +127,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         id: spotifyTrack.id,
         uri: spotifyTrack.uri,
         title: spotifyTrack.name,
-        // Explicitly type 'a' here
-        artist: spotifyTrack.artists
-          .map((a: SpotifyArtist) => a.name)
-          .join(", "),
+        artist: spotifyTrack.artists.map((a) => a.name).join(", "),
         album: spotifyTrack.album.name,
         cover: spotifyTrack.album.images[0]?.url ?? "/placeholder-cover.png",
         durationMs: spotifyTrack.duration_ms,
         explicit: spotifyTrack.explicit,
       });
+      // Reset time/duration when track changes
+      setCurrentTime(0);
+      setDuration((spotifyTrack.duration_ms ?? 0) / 1000);
+    } else if (spotifyTrack) {
+      // Update duration/position only if the track is the same
+      setDuration((state.duration ?? 0) / 1000);
+      setCurrentTime((state.position ?? 0) / 1000);
     }
 
-    // Use optional chaining and nullish coalescing for safety
-    setDuration((state.duration ?? 0) / 1000);
-    setCurrentTime((state.position ?? 0) / 1000);
     setIsPlaying(!(state.paused ?? true));
-  }, [spotify.playbackState, playbackSource, currentTrack?.id]);
 
-  // -- Playback Actions -- //
+    // Note: Volume sync from Spotify might be needed if controlled externally
+  }, [spotify.playbackState, playbackSource, currentTrack?.id]); // currentTrack?.id dependency is correct here
+
+  // -- Playback Actions (for PlayerActionsContext) -- //
 
   const play = useCallback(
     async (
@@ -134,96 +155,99 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         | { source: "spotify"; uri: string }
         | { source: "local"; track: DisplayableTrack },
     ) => {
-      // Stop existing playback before starting new
+      // Stop existing local playback
       if (playbackSource === "local" && audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+        audioRef.current.currentTime = 0; // Reset position
       }
-      // Consider pausing Spotify if it was playing?
-      // await spotify.pause(); // Maybe too aggressive?
+      // Consider pausing Spotify if it was playing? (Might be too disruptive)
+      // if (playbackSource === 'spotify') { await spotify.pause(); }
 
+      // Reset core state before starting
       setPlaybackSource(trackInfo.source);
-      setIsPlaying(true); // Assume playback starts immediately
-      setCurrentTime(0); // Reset time
-      setDuration(0); // Reset duration until loaded
+      setCurrentTime(0);
+      setDuration(0); // Duration will be updated by useEffect or loadedMetadata
+      setIsPlaying(true); // Assume playback starts
 
       if (trackInfo.source === "spotify") {
+        setCurrentTrack(null); // Clear local track info, rely on useEffect sync
         if (!spotify.isPlayerReady) {
           console.error("Spotify player not ready");
           setIsPlaying(false);
+          setPlaybackSource(null); // Revert source if fails
           return;
         }
         try {
-          // Set track details immediately for UI responsiveness
-          // We will get more accurate details from playbackState later
-          // This requires fetching track details if not already available
-          // For simplicity, let's assume for now the caller provides enough
-          // or we rely on the useEffect above to populate details.
           console.log("Playing Spotify URI:", trackInfo.uri);
           await spotify.play(trackInfo.uri);
-          // State updates (track, time, duration, isPlaying) will come via useEffect hook
+          // State updates (track, time, duration, isPlaying) handled by useEffect hook
         } catch (error) {
           console.error("Spotify play error:", error);
           setIsPlaying(false);
-          setPlaybackSource(null);
+          setPlaybackSource(null); // Revert source on error
         }
       } else {
         // Local playback
         if (!audioRef.current) return;
-        setCurrentTrack(trackInfo.track); // Set track details
+        setCurrentTrack(trackInfo.track); // Set local track details
+        setDuration((trackInfo.track.durationMs ?? 0) / 1000); // Set duration if available
         audioRef.current.src = trackInfo.track.url ?? "";
         audioRef.current.volume = volume / 100; // Set initial volume
         try {
           await audioRef.current.play();
-          // isPlaying state will be confirmed by 'onPlay' handler
+          // isPlaying state confirmed by 'onPlay' handler
         } catch (error) {
           console.error("Local play error:", error);
           setIsPlaying(false);
-          setPlaybackSource(null);
+          setPlaybackSource(null); // Revert source on error
         }
       }
     },
-    [spotify, playbackSource, volume], // Added volume dependency
+    [spotify, playbackSource, volume], // Include all state dependencies
   );
 
   const pause = useCallback(async () => {
     if (playbackSource === "spotify") {
-      await spotify.pause(); // SDK should trigger state update
+      await spotify.pause(); // SDK triggers state update via useEffect
     } else if (playbackSource === "local" && audioRef.current) {
-      audioRef.current.pause(); // onPause handler will set isPlaying
+      audioRef.current.pause(); // onPause handler updates isPlaying
     }
   }, [playbackSource, spotify]);
 
   const resume = useCallback(async () => {
     if (playbackSource === "spotify") {
-      await spotify.resume(); // SDK should trigger state update
+      await spotify.resume(); // SDK triggers state update via useEffect
     } else if (playbackSource === "local" && audioRef.current) {
       try {
-        await audioRef.current.play(); // onPlay handler will set isPlaying
+        await audioRef.current.play(); // onPlay handler updates isPlaying
       } catch (error) {
         console.error("Local resume error:", error);
-        setIsPlaying(false); // Ensure state is correct on error
+        setIsPlaying(false); // Correct state on error
       }
     }
   }, [playbackSource, spotify]);
 
   const seek = useCallback(
     async (timeSeconds: number) => {
+      const clampedTime = Math.max(0, timeSeconds); // Ensure time is not negative
       if (playbackSource === "spotify") {
-        await spotify.seek(timeSeconds * 1000); // SDK expects ms
+        // Optimistically update UI, Spotify state sync corrects it
+        setCurrentTime(clampedTime);
+        await spotify.seek(clampedTime * 1000); // SDK expects ms
       } else if (playbackSource === "local" && audioRef.current) {
-        audioRef.current.currentTime = timeSeconds;
-        setCurrentTime(timeSeconds); // Update state immediately
+        // Ensure seek is within bounds for local files
+        const safeTime = Math.min(clampedTime, duration);
+        audioRef.current.currentTime = safeTime;
+        setCurrentTime(safeTime); // Update state immediately
       }
     },
-    [playbackSource, spotify],
+    [playbackSource, spotify, duration], // Added duration dependency
   );
 
   const handleSetVolume = useCallback(
-    // Renamed to avoid conflict with state setter
     async (volumePercent: number) => {
       const newVolume = Math.max(0, Math.min(100, volumePercent));
-      setVolume(newVolume);
+      setVolume(newVolume); // Update state immediately
       if (playbackSource === "spotify") {
         await spotify.setVolume(newVolume / 100); // SDK expects 0-1
       } else if (playbackSource === "local" && audioRef.current) {
@@ -242,86 +266,117 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [playbackSource]);
 
   const handleAudioPause = useCallback(() => {
-    // Only set isPlaying false if source is still 'local'
-    // Prevents race conditions if source changes quickly
     if (playbackSource === "local") {
       setIsPlaying(false);
     }
   }, [playbackSource]);
 
-  const handleAudioEnded = useCallback(() => {
-    if (playbackSource === "local") {
-      setIsPlaying(false);
-      setCurrentTime(0);
-      // Maybe play next track here?
-    }
-  }, [playbackSource]);
-
-  const handleAudioTimeUpdate = useCallback(() => {
-    if (playbackSource === "local" && audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  }, [playbackSource]);
-
-  const handleAudioLoadedMetadata = useCallback(() => {
-    if (playbackSource === "local" && audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
-  }, [playbackSource]);
-
-  // Correct type for onError: ReactEventHandler<HTMLAudioElement>
-  const handleAudioError = useCallback(
-    (e: SyntheticEvent<HTMLAudioElement, Event>) => {
+  const handleTimeUpdate = useCallback(
+    (event: SyntheticEvent<HTMLAudioElement>) => {
       if (playbackSource === "local") {
-        console.error("Local Audio Error Target:", e.target);
-        setIsPlaying(false);
-        setPlaybackSource(null);
-        setCurrentTrack(null);
+        // Update progress context state
+        setCurrentTime(event.currentTarget.currentTime);
       }
     },
     [playbackSource],
   );
 
-  // --- Context Value --- //
+  const handleLoadedMetadata = useCallback(
+    (event: SyntheticEvent<HTMLAudioElement>) => {
+      if (playbackSource === "local") {
+        // Update state context state
+        setDuration(event.currentTarget.duration);
+      }
+    },
+    [playbackSource],
+  );
 
-  const contextValue: PlayerContextType = {
-    playbackSource,
-    currentTrack,
-    isPlaying,
-    currentTime,
-    duration,
-    volume,
-    play,
-    pause,
-    resume,
-    seek,
-    setVolume: handleSetVolume, // Provide the handler function
-  };
+  const handleAudioEnded = useCallback(() => {
+    if (playbackSource === "local") {
+      setIsPlaying(false);
+      setCurrentTime(0); // Reset time
+      // Add logic for playing next track here if needed
+      console.log("Local track ended");
+    }
+    // Note: Spotify SDK handles track ending via state updates
+  }, [playbackSource]);
+
+  // --- Context Values (Memoized) --- //
+
+  const stateValue = useMemo(
+    () => ({
+      playbackSource,
+      currentTrack,
+      isPlaying,
+      duration,
+      volume,
+    }),
+    [playbackSource, currentTrack, isPlaying, duration, volume],
+  );
+
+  const actionsValue = useMemo(
+    () => ({
+      play,
+      pause,
+      resume,
+      seek,
+      setVolume: handleSetVolume, // Use the handler name
+    }),
+    [play, pause, resume, seek, handleSetVolume], // Use stable function references
+  );
+
+  const progressValue = useMemo(
+    () => ({
+      currentTime,
+    }),
+    [currentTime],
+  );
+
+  // --- Render Provider Tree --- //
 
   return (
-    <PlayerContext.Provider value={contextValue}>
-      {children}
-      {/* Hidden Audio Element for Local Playback */}
-      <audio
-        ref={audioRef}
-        onPlay={handleAudioPlay}
-        onPause={handleAudioPause}
-        onEnded={handleAudioEnded}
-        onTimeUpdate={handleAudioTimeUpdate}
-        onLoadedMetadata={handleAudioLoadedMetadata}
-        onError={handleAudioError}
-        // preload="metadata" // Might help load duration faster
-      />
-    </PlayerContext.Provider>
+    <PlayerStateContext.Provider value={stateValue}>
+      <PlayerActionsContext.Provider value={actionsValue}>
+        <PlayerProgressContext.Provider value={progressValue}>
+          {children}
+          {/* Hidden Audio Element for local playback */}
+          <audio
+            ref={audioRef}
+            onPlay={handleAudioPlay}
+            onPause={handleAudioPause}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onEnded={handleAudioEnded}
+            // Consider adding onError handler
+          />
+        </PlayerProgressContext.Provider>
+      </PlayerActionsContext.Provider>
+    </PlayerStateContext.Provider>
   );
 }
 
-// --- Hook --- //
+// --- Custom Hooks (Split) --- //
 
-export function usePlayer() {
-  const context = useContext(PlayerContext);
+export function usePlayerState() {
+  const context = useContext(PlayerStateContext);
   if (context === undefined) {
-    throw new Error("usePlayer must be used within a PlayerProvider");
+    throw new Error("usePlayerState must be used within a PlayerProvider");
+  }
+  return context;
+}
+
+export function usePlayerActions() {
+  const context = useContext(PlayerActionsContext);
+  if (context === undefined) {
+    throw new Error("usePlayerActions must be used within a PlayerProvider");
+  }
+  return context;
+}
+
+export function usePlayerProgress() {
+  const context = useContext(PlayerProgressContext);
+  if (context === undefined) {
+    throw new Error("usePlayerProgress must be used within a PlayerProvider");
   }
   return context;
 }

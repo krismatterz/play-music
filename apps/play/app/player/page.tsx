@@ -3,7 +3,7 @@
 import Image from "next/image";
 import PlaylistItem from "../../components/ui/PlaylistItem";
 import { useState, useEffect } from "react";
-import { usePlayer } from "../../context/PlayerContext";
+import { usePlayerState, usePlayerActions } from "../../context/PlayerContext";
 import type { DisplayableTrack } from "../../context/PlayerContext";
 import { formatDuration } from "../../utils/formatDuration";
 
@@ -69,17 +69,9 @@ const playlist: DisplayableTrack[] = [
 ];
 
 export default function Player() {
-  // Remove local isPlaying state
-  // const [isPlaying, setIsPlaying] = useState(true);
-
-  // Get player state and actions from context
-  const {
-    currentTrack: contextCurrentTrack,
-    isPlaying,
-    play,
-    pause,
-    resume,
-  } = usePlayer();
+  // Get player state and actions from context using new hooks
+  const { currentTrack: contextCurrentTrack, isPlaying } = usePlayerState();
+  const { play, pause, resume } = usePlayerActions();
 
   // Local state to track which *list item* was selected, not the *playing* track
   // Defaults to showing the first track's details if nothing is playing yet
@@ -87,11 +79,9 @@ export default function Player() {
   const displayTrack =
     contextCurrentTrack ?? playlist[selectedTrackIndex] ?? playlist[0];
 
-  // REMOVED useEffect that called setCurrentTrack
-
   const handleTrackClick = (index: number) => {
     const trackToPlay = playlist[index];
-    if (trackToPlay && trackToPlay.url) {
+    if (trackToPlay?.url) {
       setSelectedTrackIndex(index); // Update which track details are shown initially
       // Call the context play function for local playback
       play({ source: "local", track: trackToPlay }).catch(console.error);

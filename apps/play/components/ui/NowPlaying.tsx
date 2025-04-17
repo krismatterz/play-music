@@ -3,7 +3,11 @@
 import React, { useMemo } from "react";
 import Image from "next/image";
 import ExplicitBadge from "./ExplicitBadge";
-import { usePlayer } from "../../context/PlayerContext";
+import {
+  usePlayerState,
+  usePlayerActions,
+  usePlayerProgress,
+} from "../../context/PlayerContext";
 import { formatDuration } from "../../utils/formatDuration";
 
 // Default track to show when nothing is playing
@@ -17,38 +21,38 @@ const defaultTrack = {
 };
 
 const NowPlaying: React.FC = () => {
-  // Get unified state and actions from PlayerContext
+  // Consume split contexts
   const {
     currentTrack: contextTrack,
     isPlaying,
-    currentTime,
     duration,
     volume,
-    pause,
-    resume,
-    seek,
-    setVolume,
-    playbackSource,
-  } = usePlayer();
+  } = usePlayerState();
+  const { pause, resume, seek, setVolume } = usePlayerActions();
+  const { currentTime } = usePlayerProgress();
 
   // Use context track or default placeholder
   const track = contextTrack ?? defaultTrack;
 
   // Format time display (Memoize to avoid recalculating on every render)
   const formattedCurrentTime = useMemo(
-    () => formatDuration(currentTime * 1000),
+    () => formatDuration(currentTime * 1000), // Already multiplied by 1000 if durationMs is used
     [currentTime],
   );
-  const formattedDuration = useMemo(
-    () => formatDuration(track.durationMs ?? duration * 1000),
-    [track.durationMs, duration],
-  );
+  const formattedDuration = useMemo(() => {
+    // Prioritize duration from state if available (more accurate for Spotify)
+    const durationSeconds =
+      duration > 0 ? duration : (track.durationMs ?? 0) / 1000;
+    return formatDuration(durationSeconds * 1000);
+  }, [track.durationMs, duration]);
 
   // Calculate progress percentage
   const progressPercent = useMemo(() => {
-    const totalDuration =
+    const totalDurationSeconds =
       duration > 0 ? duration : (track.durationMs ?? 0) / 1000;
-    return totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0;
+    return totalDurationSeconds > 0
+      ? (currentTime / totalDurationSeconds) * 100
+      : 0;
   }, [currentTime, duration, track.durationMs]);
 
   // --- Event Handlers --- //
@@ -80,16 +84,16 @@ const NowPlaying: React.FC = () => {
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only allow seeking if duration is known
-    const totalDuration =
+    const totalDurationSeconds =
       duration > 0 ? duration : (track.durationMs ?? 0) / 1000;
-    if (totalDuration <= 0) return;
+    if (totalDurationSeconds <= 0) return;
 
     const progressBar = e.currentTarget;
     const rect = progressBar.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const width = rect.width;
     const seekPositionPercent = offsetX / width;
-    const seekPositionSeconds = totalDuration * seekPositionPercent;
+    const seekPositionSeconds = totalDurationSeconds * seekPositionPercent;
 
     void seek(seekPositionSeconds);
   };

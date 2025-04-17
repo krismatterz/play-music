@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import ExplicitBadge from "../ui/ExplicitBadge";
 import { useSpotify } from "../../context/SpotifyContext";
-import { usePlayer } from "../../context/PlayerContext";
+import { usePlayerState, usePlayerActions } from "../../context/PlayerContext";
 import type { DisplayableTrack } from "../../context/PlayerContext";
 import { formatDuration } from "../../utils/formatDuration";
 import { Play, Pause } from "lucide-react";
@@ -84,7 +84,8 @@ interface LocalTracksResponse {
 
 const SmartPlaylistView: React.FC = () => {
   const spotify = useSpotify();
-  const player = usePlayer();
+  const { currentTrack, isPlaying, duration } = usePlayerState();
+  const { play } = usePlayerActions();
 
   // Local state only for the list of tracks to display
   const [displayTracks, setDisplayTracks] = useState<DisplayableTrack[]>([]);
@@ -170,29 +171,27 @@ const SmartPlaylistView: React.FC = () => {
     void fetchAndSetTracks();
   }, [spotify.isAuthenticated]); // Re-fetch when auth status changes
 
-  // Handle track click - delegate to PlayerContext
+  // Handle track click - use play from usePlayerActions
   const handleTrackClick = (track: DisplayableTrack) => {
     if (spotify.isAuthenticated) {
       if (track.uri) {
-        // Play using Spotify via PlayerContext
-        player.play({ source: "spotify", uri: track.uri }).catch(console.error);
+        play({ source: "spotify", uri: track.uri }).catch(console.error);
       } else {
         console.warn("Clicked Spotify track has no URI:", track);
       }
     } else {
       if (track.url) {
-        // Play using local source via PlayerContext
-        player.play({ source: "local", track: track }).catch(console.error);
+        play({ source: "local", track: track }).catch(console.error);
       } else {
         console.warn("Clicked local track has no URL:", track);
       }
     }
   };
 
-  // Determine if a specific track in the list is the one currently playing
+  // Determine if a specific track is playing - use state from usePlayerState
   const isTrackPlaying = (track: DisplayableTrack): boolean => {
-    if (!player.currentTrack) return false;
-    return player.isPlaying && player.currentTrack.id === track.id;
+    if (!currentTrack) return false;
+    return isPlaying && currentTrack.id === track.id;
   };
 
   return (
@@ -240,17 +239,17 @@ const SmartPlaylistView: React.FC = () => {
         ) : (
           <div className="divide-y divide-white/5">
             {displayTracks.map((track, i) => {
-              const isPlaying = isTrackPlaying(track);
+              const playingThisTrack = isTrackPlaying(track);
               return (
                 <div
                   key={track.id || track.title + i}
-                  className={`flex cursor-pointer items-center gap-3 p-3 ${isPlaying ? "bg-white/10" : "hover:bg-white/5"}`}
+                  className={`flex cursor-pointer items-center gap-3 p-3 ${playingThisTrack ? "bg-white/10" : "hover:bg-white/5"}`}
                   onClick={() => handleTrackClick(track)}
                 >
                   <div className="flex w-8 items-center justify-center font-mono text-sm text-neutral-400">
-                    {isPlaying ? (
+                    {playingThisTrack ? (
                       <Pause className="h-4 w-4 text-green-500" />
-                    ) : player.currentTrack?.id === track.id ? (
+                    ) : currentTrack?.id === track.id ? (
                       <Play className="h-4 w-4 text-white" />
                     ) : (
                       i + 1
@@ -267,7 +266,7 @@ const SmartPlaylistView: React.FC = () => {
 
                   <div className="flex-1 overflow-hidden">
                     <div
-                      className={`flex items-center truncate text-sm font-medium text-white ${isPlaying ? "text-green-500" : ""}`}
+                      className={`flex items-center truncate text-sm font-medium text-white ${playingThisTrack ? "text-green-500" : ""}`}
                     >
                       {track.title}
                       {track.explicit && <ExplicitBadge />}
@@ -277,8 +276,8 @@ const SmartPlaylistView: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-xs text-neutral-400">
-                    {player.currentTrack?.id === track.id && player.duration > 0
-                      ? formatDuration(player.duration * 1000)
+                    {currentTrack?.id === track.id && duration > 0
+                      ? formatDuration(duration * 1000)
                       : formatDuration(track.durationMs ?? 0)}
                   </div>
                 </div>

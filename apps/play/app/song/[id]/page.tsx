@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { usePlayer } from "../../../context/PlayerContext";
+import {
+  usePlayerState,
+  usePlayerActions,
+} from "../../../context/PlayerContext";
 import ExplicitBadge from "../../../components/ui/ExplicitBadge";
 
 // Mock data for the songs
@@ -88,7 +91,7 @@ const songs = [
 export default function SongPage() {
   const params = useParams();
   const router = useRouter();
-  const { setCurrentTrack, setIsPlaying } = usePlayer();
+  const { currentTrack, setIsPlaying } = usePlayer();
   const [song, setSong] = useState<(typeof songs)[0] | null>(null);
 
   useEffect(() => {
