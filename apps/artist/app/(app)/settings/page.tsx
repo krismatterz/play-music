@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@play/ui";
+import { Button } from "../../../components/ui/button";
 import { UserButton } from "@clerk/nextjs";
 
 export default function SettingsPage() {
@@ -11,7 +11,7 @@ export default function SettingsPage() {
         <UserButton />
       </div>
       <div className="flex flex-wrap justify-center gap-4">
-        <Button variant="primary" size="lg">
+        <Button variant="default" size="lg">
           Edit Profile
         </Button>
         <Button variant="outline" size="lg">

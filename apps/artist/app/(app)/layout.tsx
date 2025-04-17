@@ -1,7 +1,6 @@
 "use client";
 
 import { Sidebar } from "../../components/Sidebar";
-import { useState } from "react";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
