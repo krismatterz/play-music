@@ -194,4 +194,19 @@ $$ language plpgsql;
 create trigger update_playlists_updated_at
 before update on play.playlists
 for each row
-execute function play.update_updated_at(); 
+execute function play.update_updated_at();
+
+-- Seed fallback playlist and tracks (replace '<YOUR_USER_ID>' with your Supabase user ID)
+with fallback_playlist as (
+  insert into play.playlists (user_id, name, description, is_public)
+  values ('<YOUR_USER_ID>', 'Fallback Playlist', 'Local MP3 fallback', true)
+  returning id
+)
+insert into play.playlist_tracks (playlist_id, track_id, track_details, position)
+values
+((select id from fallback_playlist), 'eladio-invencible', '{"name":"Eladio Carrión - Invencible","url":"/music/Eladio Carrión - Invencible.mp3"}', 1),
+((select id from fallback_playlist), 'tayna-thana', '{"name":"Tayna - Thana","url":"/music/Tayna - Thana.mp3"}', 2),
+((select id from fallback_playlist), 'martin-weightless', '{"name":"Martin Garrix & Arjit Singh - Weightless","url":"/music/Martin Garrix & Arjit Singh - Weightless.mp3"}', 3),
+((select id from fallback_playlist), 'anyma-work', '{"name":"Anyma - Work (feat. Yeat)","url":"/music/Anyma - Work (feat. Yeat).mp3"}', 4),
+((select id from fallback_playlist), 'bele-frente-al-mar', '{"name":"Beéle - frente al mar","url":"/music/Beéle - frente al mar.mp3"}', 5),
+((select id from fallback_playlist), 'badbunny-perfumito', '{"name":"BAD BUNNY ft. RaiNao - PERFuMITO NUEVO","url":"/music/BAD BUNNY ft. RaiNao - PERFuMITO NUEVO.mp3"}', 6); 

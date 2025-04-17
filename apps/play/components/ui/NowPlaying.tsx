@@ -1,177 +1,157 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import ExplicitBadge from "./ExplicitBadge";
 import { usePlayer } from "../../context/PlayerContext";
-import { useSpotify } from "../../context/SpotifyContext";
+import { formatDuration } from "../../utils/formatDuration";
+
+// Default track to show when nothing is playing
+const defaultTrack = {
+  id: "default",
+  title: "No music playing",
+  artist: "-",
+  cover: "/placeholder-cover.png", // Replace with a generic placeholder
+  durationMs: 0,
+  explicit: false,
+};
 
 const NowPlaying: React.FC = () => {
-  const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
-  const spotify = useSpotify();
-  const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(50);
-  const [currentTime, setCurrentTime] = useState("0:00");
+  // Get unified state and actions from PlayerContext
+  const {
+    currentTrack: contextTrack,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    pause,
+    resume,
+    seek,
+    setVolume,
+    playbackSource,
+  } = usePlayer();
 
-  // Use default track if no track is set in context
-  const track = currentTrack ?? {
-    title: "Invencible",
-    artist: "Eladio Carrión",
-    cover: "/landing/Eladio_DON_KBRN_Cover.png",
-    duration: "3:24",
-    currentTime: "1:30",
-    explicit: true,
-  };
+  // Use context track or default placeholder
+  const track = contextTrack ?? defaultTrack;
 
-  // Update progress bar based on playback state
-  useEffect(() => {
-    if (!spotify.playbackState) return;
+  // Format time display (Memoize to avoid recalculating on every render)
+  const formattedCurrentTime = useMemo(
+    () => formatDuration(currentTime * 1000),
+    [currentTime],
+  );
+  const formattedDuration = useMemo(
+    () => formatDuration(track.durationMs ?? duration * 1000),
+    [track.durationMs, duration],
+  );
 
-    const updateProgress = () => {
-      if (!spotify.playbackState) return;
+  // Calculate progress percentage
+  const progressPercent = useMemo(() => {
+    const totalDuration =
+      duration > 0 ? duration : (track.durationMs ?? 0) / 1000;
+    return totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0;
+  }, [currentTime, duration, track.durationMs]);
 
-      // Use type assertion to specify we know the structure
-      const durationMs = spotify.playbackState?.duration as number | undefined;
-      const positionMs = spotify.playbackState?.position as number | undefined;
+  // --- Event Handlers --- //
 
-      if (durationMs && positionMs) {
-        setProgress((positionMs / durationMs) * 100);
-
-        // Format current time
-        const minutes = Math.floor(positionMs / 60000);
-        const seconds = Math.floor((positionMs % 60000) / 1000);
-        setCurrentTime(`${minutes}:${seconds < 10 ? "0" : ""}${seconds}`);
-      }
-    };
-
-    // Update immediately
-    updateProgress();
-
-    // Update every second if playing
-    let interval: NodeJS.Timeout;
-    if (isPlaying) {
-      interval = setInterval(updateProgress, 1000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [spotify.playbackState, isPlaying]);
-
-  // Initial volume
-  useEffect(() => {
-    const getInitialVolume = async () => {
-      if (spotify.isPlayerReady && spotify.player) {
-        const playerVolume = await spotify.player.getVolume();
-        if (playerVolume !== undefined) {
-          setVolume(Math.round(playerVolume * 100));
-        }
-      }
-    };
-
-    void getInitialVolume();
-  }, [spotify.isPlayerReady, spotify.player]);
-
-  // Handle volume change
-  const handleVolumeChange = async (newVolume: number) => {
-    setVolume(newVolume);
-    await spotify.setVolume(newVolume);
-  };
-
-  // Handle play/pause
   const handlePlayPause = async () => {
-    togglePlayPause();
     if (isPlaying) {
-      await spotify.pause();
+      await pause();
     } else {
-      await spotify.resume();
+      // Only resume if there's a track loaded
+      if (contextTrack) {
+        await resume();
+      }
     }
   };
 
-  // Handle next/previous track
-  const handleNextTrack = async () => {
-    await spotify.nextTrack();
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = Number(event.target.value);
+    void setVolume(newVolume); // Fire and forget volume change
   };
 
-  const handlePreviousTrack = async () => {
-    await spotify.previousTrack();
+  const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const volumeBar = e.currentTarget;
+    const rect = volumeBar.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const width = rect.width;
+    const newVolume = Math.round((offsetX / width) * 100);
+    void setVolume(newVolume);
   };
 
-  // Handle seek
-  const handleSeek = async (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!spotify.playbackState) return;
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only allow seeking if duration is known
+    const totalDuration =
+      duration > 0 ? duration : (track.durationMs ?? 0) / 1000;
+    if (totalDuration <= 0) return;
 
     const progressBar = e.currentTarget;
     const rect = progressBar.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const width = rect.width;
     const seekPositionPercent = offsetX / width;
+    const seekPositionSeconds = totalDuration * seekPositionPercent;
 
-    // Use type assertion to specify we know the structure
-    const durationMs = spotify.playbackState?.duration as number;
-    const seekPositionMs = Math.floor(durationMs * seekPositionPercent);
-
-    await spotify.seek(seekPositionMs);
+    void seek(seekPositionSeconds);
   };
 
-  // Login with Spotify if not authenticated
-  const handleLogin = async () => {
-    if (!spotify.isAuthenticated) {
-      await spotify.login();
-    }
+  // TODO: Implement next/previous handlers using context functions when added
+  const handleNextTrack = async () => {
+    console.log("Next track clicked - Not implemented in context yet");
   };
+
+  const handlePreviousTrack = async () => {
+    console.log("Previous track clicked - Not implemented in context yet");
+  };
+
+  // Check if playback controls should be disabled
+  const controlsDisabled = !contextTrack;
 
   return (
-    <div className="flex flex-col items-center">
-      {!spotify.isAuthenticated ? (
-        <button
-          onClick={handleLogin}
-          className="mb-4 rounded-full bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
-        >
-          Connect with Spotify
-        </button>
-      ) : null}
-
+    <div className="flex h-full flex-col items-center p-4">
       {/* Album Cover */}
-      <div className="relative mb-4 h-64 w-64 overflow-hidden rounded-lg shadow-lg">
+      <div className="relative mb-4 aspect-square w-full max-w-xs overflow-hidden rounded-lg shadow-lg">
         <Image
           src={track.cover}
           alt={`${track.title} cover`}
           fill
           className="object-cover"
+          priority
         />
       </div>
 
       {/* Track Info */}
       <div className="mb-4 w-full text-center">
-        <div className="mb-1 flex items-center justify-center gap-1 text-lg font-bold">
+        <div className="mb-1 flex items-center justify-center gap-1 truncate text-lg font-bold text-white">
           {track.title}
           {track.explicit && <ExplicitBadge />}
         </div>
-        <div className="text-sm text-neutral-400">{track.artist}</div>
+        <div className="truncate text-sm text-neutral-400">{track.artist}</div>
       </div>
 
       {/* Progress Bar */}
-      <div className="mb-4 w-full space-y-1">
+      <div className="mb-4 w-full max-w-md space-y-1">
         <div
-          className="h-1 w-full cursor-pointer overflow-hidden rounded-full bg-white/20"
-          onClick={spotify.isPlayerReady ? handleSeek : undefined}
+          className={`h-1 w-full overflow-hidden rounded-full bg-white/20 ${controlsDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+          onClick={!controlsDisabled ? handleSeek : undefined}
         >
           <div
-            className="h-full rounded-full bg-white"
-            style={{ width: `${progress}%` }}
+            className="h-full rounded-full bg-white transition-all duration-100 ease-linear"
+            style={{ width: `${progressPercent}%` }}
           ></div>
         </div>
         <div className="flex justify-between text-xs text-neutral-400">
-          <span>{currentTime}</span>
-          <span>{track.duration}</span>
+          <span>{formattedCurrentTime}</span>
+          <span>{formattedDuration}</span>
         </div>
       </div>
 
       {/* Playback Controls */}
-      <div className="flex w-full items-center justify-center gap-x-6 px-6">
-        {/* Like Song */}
-        <button className="rounded-full p-2 text-neutral-400 hover:text-white">
+      <div className="flex w-full max-w-md items-center justify-center gap-x-6 px-6">
+        {/* TODO: Implement Like Song */}
+        <button
+          className={`rounded-full p-2 text-neutral-400 ${controlsDisabled ? "opacity-50" : "hover:text-white"}`}
+          disabled={controlsDisabled}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -183,9 +163,9 @@ const NowPlaying: React.FC = () => {
         </button>
         {/* Previous */}
         <button
-          className="rounded-full p-2 text-neutral-400 hover:text-white"
-          onClick={spotify.isPlayerReady ? handlePreviousTrack : undefined}
-          disabled={!spotify.isPlayerReady}
+          className={`rounded-full p-2 text-neutral-400 ${controlsDisabled ? "cursor-not-allowed opacity-50" : "hover:text-white"}`}
+          onClick={handlePreviousTrack}
+          disabled={controlsDisabled}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -198,8 +178,9 @@ const NowPlaying: React.FC = () => {
         </button>
         {/* Play/Pause */}
         <button
-          className="rounded-full bg-white p-3 text-black"
-          onClick={spotify.isPlayerReady ? handlePlayPause : togglePlayPause}
+          className={`rounded-full bg-white p-3 text-black ${controlsDisabled ? "cursor-not-allowed opacity-50" : ""}`}
+          onClick={handlePlayPause}
+          disabled={controlsDisabled}
         >
           {isPlaying ? (
             <svg
@@ -231,9 +212,9 @@ const NowPlaying: React.FC = () => {
         </button>
         {/* Next */}
         <button
-          className="rounded-full p-2 text-neutral-400 hover:text-white"
-          onClick={spotify.isPlayerReady ? handleNextTrack : undefined}
-          disabled={!spotify.isPlayerReady}
+          className={`rounded-full p-2 text-neutral-400 ${controlsDisabled ? "cursor-not-allowed opacity-50" : "hover:text-white"}`}
+          onClick={handleNextTrack}
+          disabled={controlsDisabled}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -244,8 +225,11 @@ const NowPlaying: React.FC = () => {
             <path d="M5.055 7.06c-1.25-.714-2.805.189-2.805 1.628v8.123c0 1.44 1.555 2.342 2.805 1.628L12 14.471v2.34c0 1.44 1.555 2.342 2.805 1.628l7.108-4.061c1.26-.72 1.26-2.536 0-3.256L14.805 7.06C13.555 6.346 12 7.25 12 8.688v2.34L5.055 7.06z" />
           </svg>
         </button>
-        {/* More Options (Three Dots) */}
-        <button className="rounded-full p-2 text-neutral-400 hover:text-white">
+        {/* TODO: Implement More Options */}
+        <button
+          className={`rounded-full p-2 text-neutral-400 ${controlsDisabled ? "opacity-50" : "hover:text-white"}`}
+          disabled={controlsDisabled}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -261,60 +245,25 @@ const NowPlaying: React.FC = () => {
         </button>
       </div>
 
-      {/* Additional Controls */}
-      <div className="mt-6 mb-4 flex w-full flex-row items-center justify-center gap-10">
-        {/* Add to Playlist */}
-        <button className="rounded-full p-2 text-neutral-400 hover:text-white">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-5 w-5"
-          >
-            <path
-              fillRule="evenodd"
-              d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-
-        {/* Volume */}
-        <div className="flex items-center gap-1">
-          {/* Volume Bar */}
+      {/* Volume Control */}
+      <div className="mt-6 mb-4 flex w-full max-w-xs items-center justify-center gap-2">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="h-5 w-5 text-neutral-400"
+        >
+          <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905h1.932l4.5 4.5c.944.945 2.561.276 2.561-1.06V4.06zM17.25 12a.75.75 0 01-.75.75h-3a.75.75 0 010-1.5h3a.75.75 0 01.75.75z" />
+        </svg>
+        <div
+          className={`h-1 w-20 overflow-hidden rounded-full bg-white/20 ${controlsDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+          onClick={!controlsDisabled ? handleVolumeClick : undefined}
+        >
           <div
-            className="h-1 w-20 cursor-pointer overflow-hidden rounded-full bg-white/20"
-            onClick={(e) => {
-              const volumeBar = e.currentTarget;
-              const rect = volumeBar.getBoundingClientRect();
-              const offsetX = e.clientX - rect.left;
-              const width = rect.width;
-              const newVolume = Math.round((offsetX / width) * 100);
-              void handleVolumeChange(newVolume);
-            }}
-          >
-            <div
-              className="h-full rounded-full bg-white"
-              style={{ width: `${volume}%` }}
-            ></div>
-          </div>
+            className="h-full rounded-full bg-white transition-all duration-100 ease-linear"
+            style={{ width: `${volume}%` }}
+          ></div>
         </div>
-
-        {/* Shuffle */}
-        <button className="rounded-full p-2 text-neutral-400 hover:text-white">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-5 w-5"
-          >
-            <path
-              fillRule="evenodd"
-              d="M13.5 4.938a7.5 7.5 0 01-10.498 10.498 7.5 7.5 0 1110.498-10.498zM5.25 12a.75.75 0 100 1.5h13.5a.75.75 0 000-1.5H5.25z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
       </div>
     </div>
   );

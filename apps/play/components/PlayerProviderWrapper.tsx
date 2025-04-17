@@ -10,8 +10,8 @@ export default function PlayerProviderWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <PlayerProvider>
-      <SpotifyProvider>{children}</SpotifyProvider>
-    </PlayerProvider>
+    <SpotifyProvider>
+      <PlayerProvider>{children}</PlayerProvider>
+    </SpotifyProvider>
   );
 }

@@ -3,52 +3,11 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import ExplicitBadge from "../ui/ExplicitBadge";
-import { useSpotify } from "../../hooks/useSpotify";
+import { useSpotify } from "../../context/SpotifyContext";
+import { usePlayer } from "../../context/PlayerContext";
+import type { DisplayableTrack } from "../../context/PlayerContext";
 import { formatDuration } from "../../utils/formatDuration";
-
-// Fallback playlist for when Spotify is not connected
-const fallbackPlaylist = [
-  {
-    title: "Invencible",
-    artist: "Eladio Carrión",
-    cover: "/landing/Eladio_DON_KBRN_Cover.png",
-    duration: "1:30",
-    isPlaying: true,
-    explicit: true,
-  },
-  {
-    title: "Weightless",
-    artist: "Martin Garrix",
-    cover: "/landing/Martin_Garrix_Weightless_Cover.png",
-    duration: "3:43",
-  },
-  {
-    title: "Thana",
-    artist: "Tayna",
-    cover: "/landing/Tayna_Thana_Cover.png",
-    duration: "3:25",
-  },
-  {
-    title: "frente al mar",
-    artist: "Béele",
-    cover: "/landing/Bélee_frente_al_mar_Cover.png",
-    duration: "2:45",
-  },
-  {
-    title: "PERFuMITO NUEVO",
-    artist: "Bad Bunny",
-    cover: "/landing/Bad_Bunny_DTMF_Cover.png",
-    duration: "3:21",
-    explicit: true,
-  },
-  {
-    title: "Work",
-    artist: "Anyma",
-    cover: "/landing/Anyma_Work_Cover.png",
-    duration: "2:54",
-    explicit: true,
-  },
-];
+import { Play, Pause } from "lucide-react";
 
 export const AppPreview: React.FC = () => {
   const previewRef = React.useRef<HTMLDivElement>(null);
@@ -90,155 +49,150 @@ export const AppPreview: React.FC = () => {
   );
 };
 
-// Type for Spotify track
-interface SpotifyTrack {
-  uri: string;
-  id: string;
-  name: string;
-  duration_ms: number;
-  explicit: boolean;
-  album: {
-    name: string;
-    images: { url: string }[];
-  };
-  artists: {
-    name: string;
-  }[];
+// Type for the Spotify API response (Saved Tracks)
+interface SavedTracksResponse {
+  items: Array<{
+    track: {
+      id: string;
+      uri: string;
+      name: string;
+      duration_ms: number;
+      explicit: boolean;
+      album: {
+        name: string;
+        images: { url: string }[];
+      };
+      artists: { name: string }[];
+    };
+  }>;
 }
 
-// Interface for our track display format
-interface DisplayTrack {
-  uri: string;
+// Type for the local playback API response
+// Ensure this matches the shape returned by /api/local-playback
+interface LocalTrackFromAPI {
+  id: string;
   title: string;
   artist: string;
   cover: string;
-  duration: string;
-  isPlaying: boolean;
+  url: string;
+  duration: string; // API returns string, PlayerContext expects number (ms)
   explicit: boolean;
 }
-
-// Type for the API response
-interface SavedTracksResponse {
-  items: Array<{
-    track: SpotifyTrack;
-  }>;
+interface LocalTracksResponse {
+  tracks: LocalTrackFromAPI[];
 }
 
 const SmartPlaylistView: React.FC = () => {
   const spotify = useSpotify();
-  const [tracks, setTracks] = useState<DisplayTrack[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentlyPlayingUri, setCurrentlyPlayingUri] = useState<string | null>(
-    null,
-  );
+  const player = usePlayer();
 
-  // Fetch tracks from Spotify
+  // Local state only for the list of tracks to display
+  const [displayTracks, setDisplayTracks] = useState<DisplayableTrack[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch tracks on mount or auth change
   useEffect(() => {
-    const fetchTracks = async () => {
-      if (!spotify.isAuthenticated || !spotify.isPlayerReady) {
-        // Use fallback playlist when not authenticated
-        setTracks(
-          fallbackPlaylist.map((track) => ({
-            ...track,
-            uri: "",
-            isPlaying: track.isPlaying ?? false,
-            explicit: track.explicit ?? false,
-          })),
-        );
-        setLoading(false);
-        return;
-      }
+    const fetchAndSetTracks = async () => {
+      setLoading(true);
+      let fetchedTracks: DisplayableTrack[] = [];
 
       try {
-        // First try to get the user's saved tracks (liked songs)
-        const response = await fetch("/api/spotify/saved-tracks");
+        if (spotify.isAuthenticated) {
+          // --- Fetch from Spotify --- //
+          const response = await fetch("/api/spotify/saved-tracks");
+          if (!response.ok)
+            throw new Error(`Spotify API Error: ${response.status}`);
+          const data = (await response.json()) as SavedTracksResponse;
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-
-        const data = (await response.json()) as SavedTracksResponse;
-
-        if (data.items && data.items.length > 0) {
-          // Transform tracks to our display format
-          const formattedTracks = data.items
-            .slice(0, 6) // Limit to 6 tracks
-            .map((item) => ({
+          if (data.items && data.items.length > 0) {
+            fetchedTracks = data.items.slice(0, 6).map((item) => ({
+              id: item.track.id,
               uri: item.track.uri,
               title: item.track.name,
               artist: item.track.artists.map((a) => a.name).join(", "),
+              album: item.track.album.name,
               cover:
                 item.track.album.images[0]?.url ?? "/placeholder-cover.png",
-              duration: formatDuration(item.track.duration_ms),
-              isPlaying: false,
+              durationMs: item.track.duration_ms,
               explicit: item.track.explicit,
+              // url is not applicable for Spotify tracks
             }));
-
-          setTracks(formattedTracks);
+          } else {
+            // Fallback to local if no Spotify tracks
+            fetchedTracks = await fetchLocalTracks();
+          }
         } else {
-          // Fallback to the static playlist if no tracks found
-          setTracks(
-            fallbackPlaylist.map((track) => ({
-              ...track,
-              uri: "",
-              isPlaying: track.isPlaying ?? false,
-              explicit: track.explicit ?? false,
-            })),
-          );
+          // --- Fetch from Local API --- //
+          fetchedTracks = await fetchLocalTracks();
         }
       } catch (error) {
         console.error("Error fetching tracks:", error);
-        // Use fallback playlist on error
-        setTracks(
-          fallbackPlaylist.map((track) => ({
-            ...track,
-            uri: "",
-            isPlaying: track.isPlaying ?? false,
-            explicit: track.explicit ?? false,
-          })),
-        );
+        try {
+          // Attempt local fetch as a last resort on any error
+          fetchedTracks = await fetchLocalTracks();
+        } catch (localError) {
+          console.error("Error fetching local fallback tracks:", localError);
+          fetchedTracks = []; // Set empty on final error
+        }
       } finally {
+        setDisplayTracks(fetchedTracks);
         setLoading(false);
       }
     };
 
-    fetchTracks();
-  }, [spotify.isAuthenticated, spotify.isPlayerReady]);
-
-  // Update currently playing track from Spotify playback state
-  useEffect(() => {
-    if (spotify.playbackState && spotify.playbackState.track_window) {
-      const currentTrack = spotify.playbackState.track_window.current_track;
-      setCurrentlyPlayingUri(currentTrack?.uri ?? null);
-
-      // Update isPlaying status for all tracks
-      setTracks((prevTracks) =>
-        prevTracks.map((track) => ({
-          ...track,
-          isPlaying:
-            track.uri === currentTrack?.uri && !spotify.playbackState?.paused,
-        })),
-      );
-    }
-  }, [spotify.playbackState]);
-
-  // Handle track click to play
-  const handleTrackClick = async (track: DisplayTrack) => {
-    if (!spotify.isAuthenticated) {
-      // Prompt to login if not authenticated
-      await spotify.login();
-      return;
-    }
-
-    if (track.uri) {
-      if (spotify.isPremium) {
-        // For premium users, play directly in the app
-        await spotify.play(track.uri);
+    // Helper function to fetch local tracks
+    const fetchLocalTracks = async (): Promise<DisplayableTrack[]> => {
+      const response = await fetch("/api/local-playback");
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn("Fallback playlist not found in DB.");
+        } else {
+          throw new Error(`Local API Error: ${response.status}`);
+        }
+        return []; // Return empty array on error/404
       } else {
-        // For non-premium users, open in Spotify app
-        spotify.openSpotifyApp(track.uri);
+        const data = (await response.json()) as LocalTracksResponse;
+        // Convert API data to DisplayableTrack format
+        return data.tracks.map((track) => ({
+          id: track.id,
+          title: track.title,
+          artist: track.artist,
+          cover: track.cover,
+          url: track.url,
+          // durationMs: parseDurationStringToMs(track.duration), // Needs parsing helper
+          durationMs: 0, // Placeholder - needs parsing
+          explicit: track.explicit,
+          // uri and album might not be applicable
+        }));
+      }
+    };
+
+    void fetchAndSetTracks();
+  }, [spotify.isAuthenticated]); // Re-fetch when auth status changes
+
+  // Handle track click - delegate to PlayerContext
+  const handleTrackClick = (track: DisplayableTrack) => {
+    if (spotify.isAuthenticated) {
+      if (track.uri) {
+        // Play using Spotify via PlayerContext
+        player.play({ source: "spotify", uri: track.uri }).catch(console.error);
+      } else {
+        console.warn("Clicked Spotify track has no URI:", track);
+      }
+    } else {
+      if (track.url) {
+        // Play using local source via PlayerContext
+        player.play({ source: "local", track: track }).catch(console.error);
+      } else {
+        console.warn("Clicked local track has no URL:", track);
       }
     }
+  };
+
+  // Determine if a specific track in the list is the one currently playing
+  const isTrackPlaying = (track: DisplayableTrack): boolean => {
+    if (!player.currentTrack) return false;
+    return player.isPlaying && player.currentTrack.id === track.id;
   };
 
   return (
@@ -254,14 +208,22 @@ const SmartPlaylistView: React.FC = () => {
               className="inline-block"
             />
             <span className="text-sm font-medium text-white">
-              {spotify.isAuthenticated
-                ? "Your Top Tracks"
-                : "Recommended Tracks"}
+              {spotify.isAuthenticated ? "Your Top Tracks" : "Local Playback"}
             </span>
           </div>
+          {!spotify.isAuthenticated && displayTracks.length > 0 && (
+            <span className="text-xs text-amber-200">Using local files</span>
+          )}
+          {!spotify.isAuthenticated &&
+            displayTracks.length === 0 &&
+            !loading && (
+              <span className="text-xs text-red-400">
+                Fallback playlist empty/not found
+              </span>
+            )}
           {!spotify.isAuthenticated && (
             <button
-              onClick={() => spotify.login()}
+              onClick={() => spotify.login().catch(console.error)}
               className="rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-500"
             >
               Connect Spotify
@@ -277,54 +239,53 @@ const SmartPlaylistView: React.FC = () => {
           </div>
         ) : (
           <div className="divide-y divide-white/5">
-            {tracks.map((track, i) => (
-              <div
-                key={track.title + i}
-                className={`flex cursor-pointer items-center gap-3 p-3 ${track.isPlaying ? "bg-white/5" : "hover:bg-white/5"}`}
-                onClick={() => handleTrackClick(track)}
-              >
-                <div className="flex w-8 items-center justify-center font-mono text-sm text-neutral-400">
-                  {track.isPlaying ? (
-                    <div className="h-3 w-3 animate-pulse rounded-full bg-green-500"></div>
-                  ) : (
-                    i + 1
-                  )}
-                </div>
-
-                <Image
-                  src={track.cover}
-                  alt={track.title + " cover"}
-                  width={40}
-                  height={40}
-                  className="rounded shadow"
-                />
-
-                <div className="flex-1 overflow-hidden">
-                  <div
-                    className={`flex items-center truncate text-sm font-medium text-white ${track.isPlaying ? "text-green-500" : ""}`}
-                  >
-                    {track.title}
-                    {track.explicit && <ExplicitBadge />}
+            {displayTracks.map((track, i) => {
+              const isPlaying = isTrackPlaying(track);
+              return (
+                <div
+                  key={track.id || track.title + i}
+                  className={`flex cursor-pointer items-center gap-3 p-3 ${isPlaying ? "bg-white/10" : "hover:bg-white/5"}`}
+                  onClick={() => handleTrackClick(track)}
+                >
+                  <div className="flex w-8 items-center justify-center font-mono text-sm text-neutral-400">
+                    {isPlaying ? (
+                      <Pause className="h-4 w-4 text-green-500" />
+                    ) : player.currentTrack?.id === track.id ? (
+                      <Play className="h-4 w-4 text-white" />
+                    ) : (
+                      i + 1
+                    )}
                   </div>
-                  <div className="truncate text-xs text-neutral-400">
-                    {track.artist}
+
+                  <Image
+                    src={track.cover}
+                    alt={track.title + " cover"}
+                    width={40}
+                    height={40}
+                    className="rounded shadow"
+                  />
+
+                  <div className="flex-1 overflow-hidden">
+                    <div
+                      className={`flex items-center truncate text-sm font-medium text-white ${isPlaying ? "text-green-500" : ""}`}
+                    >
+                      {track.title}
+                      {track.explicit && <ExplicitBadge />}
+                    </div>
+                    <div className="truncate text-xs text-neutral-400">
+                      {track.artist}
+                    </div>
+                  </div>
+                  <div className="text-xs text-neutral-400">
+                    {player.currentTrack?.id === track.id && player.duration > 0
+                      ? formatDuration(player.duration * 1000)
+                      : formatDuration(track.durationMs ?? 0)}
                   </div>
                 </div>
-
-                <div className="text-xs text-neutral-400">{track.duration}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-
-        <div className="mt-2 p-3 text-center">
-          <button
-            onClick={() => (spotify.isAuthenticated ? null : spotify.login())}
-            className="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20"
-          >
-            {spotify.isAuthenticated ? "View All" : "Sign in to view more"}
-          </button>
-        </div>
 
         {spotify.isAuthenticated && !spotify.isPremium && (
           <div className="mt-2 rounded-lg bg-amber-900/30 p-2 text-xs">

@@ -6,8 +6,8 @@ import React, {
   useContext,
   useEffect,
   useCallback,
-  ReactNode,
 } from "react";
+import type { ReactNode, SyntheticEvent } from "react";
 import {
   supabase,
   signInWithSpotify,
@@ -15,16 +15,15 @@ import {
 } from "../../../packages/supabase";
 import { SpotifyWebPlayback } from "../../../packages/supabase/spotify-player";
 import * as spotifyApi from "../../../packages/supabase/spotify";
-import { usePlayer } from "./PlayerContext";
 
-// Define types
-type SpotifyContextType = {
+// Define types (reverting state to unknown)
+interface SpotifyContextType {
   isAuthenticated: boolean;
   isPlayerReady: boolean;
   isPremium: boolean;
   deviceId: string | null;
-  currentTrack: any | null;
-  playbackState: any | null;
+  currentTrack: unknown | null;
+  playbackState: unknown | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   play: (uri?: string, positionMs?: number) => Promise<void>;
@@ -37,7 +36,7 @@ type SpotifyContextType = {
   setVolume: (volumePercent: number) => Promise<void>;
   player?: SpotifyWebPlayback | null;
   openSpotifyApp: (uri?: string) => void;
-};
+}
 
 const SpotifyContext = createContext<SpotifyContextType | undefined>(undefined);
 
@@ -50,10 +49,8 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [player, setPlayer] = useState<SpotifyWebPlayback | null>(null);
-  const [currentTrack, setCurrentTrack] = useState<any | null>(null);
-  const [playbackState, setPlaybackState] = useState<any | null>(null);
-
-  const { setCurrentTrack: setPlayerContextTrack, setIsPlaying } = usePlayer();
+  const [currentTrack, setCurrentTrack] = useState<unknown | null>(null);
+  const [playbackState, setPlaybackState] = useState<unknown | null>(null);
 
   // Check authentication status
   useEffect(() => {
@@ -133,7 +130,13 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     const initializePlayer = async () => {
       try {
         const getOAuthToken = (cb: (token: string) => void) => {
-          cb(accessToken);
+          if (accessToken) {
+            cb(accessToken);
+          } else {
+            console.error(
+              "Attempted to get OAuth token, but accessToken is null",
+            );
+          }
         };
 
         const webPlayback = new SpotifyWebPlayback(
@@ -141,33 +144,20 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
           "Play Music App",
         );
 
-        webPlayback.onReady((deviceId) => {
-          setDeviceId(deviceId);
+        webPlayback.onReady((newDeviceId) => {
+          console.log("Spotify Player Ready with Device ID:", newDeviceId);
+          setDeviceId(newDeviceId);
           setIsPlayerReady(true);
         });
 
         webPlayback.onPlayerStateChanged((state) => {
+          console.log("Spotify Player State Changed:", state);
           setPlaybackState(state);
-
-          if (state) {
-            setIsPlaying(!state.paused);
-          } else {
-            setIsPlaying(false);
-          }
         });
 
         webPlayback.onTrackChanged((track) => {
+          console.log("Spotify Track Changed:", track);
           setCurrentTrack(track);
-
-          // Update PlayerContext
-          setPlayerContextTrack({
-            title: track.name,
-            artist: track.artists.map((a: any) => a.name).join(", "),
-            album: track.album.name,
-            cover: track.album.images[0]?.url ?? "",
-            duration: formatDuration(track.duration ?? 0),
-            explicit: false,
-          });
         });
 
         webPlayback.onError((error) => {
@@ -175,12 +165,16 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
         });
 
         const success = await webPlayback.initialize();
+        console.log("Spotify Player Initialization Success:", success);
 
         if (success) {
           setPlayer(webPlayback);
+        } else {
+          setIsPlayerReady(false);
         }
       } catch (error) {
         console.error("Failed to initialize Spotify player:", error);
+        setIsPlayerReady(false);
       }
     };
 
@@ -188,197 +182,183 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
 
     return () => {
       if (player) {
+        console.log("Disconnecting Spotify player");
         player.disconnect();
+        setPlayer(null);
+        setIsPlayerReady(false);
+        setDeviceId(null);
+        setPlaybackState(null);
+        setCurrentTrack(null);
       }
     };
-  }, [
-    isAuthenticated,
-    accessToken,
-    isPremium,
-    setIsPlaying,
-    setPlayerContextTrack,
-  ]);
-
-  // Helper function to format duration
-  const formatDuration = (durationMs: number): string => {
-    const minutes = Math.floor(durationMs / 60000);
-    const seconds = ((durationMs % 60000) / 1000).toFixed(0);
-    return `${minutes}:${Number(seconds) < 10 ? "0" : ""}${seconds}`;
-  };
+  }, [isAuthenticated, accessToken, isPremium]);
 
   // Login with Spotify
   const login = useCallback(async () => {
-    try {
-      await signInWithSpotify();
-    } catch (error) {
-      console.error("Error signing in with Spotify:", error);
-    }
+    const { error } = await signInWithSpotify();
+    if (error) console.error("Spotify Login Error:", error);
   }, []);
 
   // Logout
-  const logout = useCallback(async () => {
-    try {
-      if (player) {
-        player.disconnect();
-        setPlayer(null);
-      }
-
-      await signOut();
-      setIsAuthenticated(false);
-      setAccessToken(null);
-      setIsPlayerReady(false);
-      setDeviceId(null);
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  }, [player]);
+  const logoutUser = useCallback(async () => {
+    const { error } = await signOut();
+    if (error) console.error("Sign Out Error:", error);
+    setIsAuthenticated(false);
+    setAccessToken(null);
+    setIsPremium(false);
+    setIsPlayerReady(false);
+    setDeviceId(null);
+    setPlaybackState(null);
+    setCurrentTrack(null);
+  }, []);
 
   // Function to open the Spotify app (alternative for non-premium users)
   const openSpotifyApp = useCallback((uri?: string) => {
     if (!uri) {
-      window.open("https://open.spotify.com", "_blank");
+      console.warn("No URI provided to openSpotifyApp");
+      window.open("spotify:", "_blank");
       return;
     }
-
-    // Convert any Spotify URI to the open.spotify.com format if needed
-    let webUrl = uri;
-    if (uri.startsWith("spotify:")) {
-      // Replace spotify:track:id with https://open.spotify.com/track/id
-      webUrl = uri.replace("spotify:", "").replace(":", "/");
-      webUrl = `https://open.spotify.com/${webUrl}`;
+    if (
+      uri.startsWith("spotify:track:") ||
+      uri.startsWith("spotify:album:") ||
+      uri.startsWith("spotify:artist:") ||
+      uri.startsWith("spotify:playlist:")
+    ) {
+      window.open(uri, "_blank");
+    } else {
+      console.warn("Attempted to open invalid Spotify URI:", uri);
+      window.open("https://open.spotify.com", "_blank");
     }
-
-    window.open(webUrl, "_blank");
   }, []);
 
   // Play function with fallback for non-premium users
   const play = useCallback(
     async (uri?: string, positionMs?: number) => {
+      if (!deviceId) {
+        console.error("Cannot play: No active Spotify device ID");
+        return;
+      }
       try {
-        if (!isPremium) {
-          // Redirect non-premium users to Spotify
-          openSpotifyApp(uri);
-          return;
-        }
-
-        if (player && isPlayerReady) {
-          await player.play(uri, positionMs);
-        }
+        // Pass uri directly as string | undefined
+        // The API function likely expects a context_uri or nothing (for resume)
+        // Playing specific track URIs might need a different approach (e.g., using 'uris' body param)
+        await spotifyApi.startPlayback(deviceId, uri, undefined, positionMs);
       } catch (error) {
-        console.error("Error playing track:", error);
+        console.error("Failed to play track/context:", error);
       }
     },
-    [player, isPlayerReady, isPremium, openSpotifyApp],
+    [deviceId],
   );
 
   // Pause
   const pause = useCallback(async () => {
+    if (!deviceId) return;
     try {
-      if (player) {
-        await player.pause();
-      }
+      await spotifyApi.pausePlayback(deviceId);
     } catch (error) {
-      console.error("Error pausing playback:", error);
+      console.error("Failed to pause playback:", error);
     }
-  }, [player]);
+  }, [deviceId]);
 
   // Resume
   const resume = useCallback(async () => {
+    if (!deviceId) return;
     try {
-      if (player) {
-        await player.resume();
-      }
+      // Pass undefined for context_uri to resume
+      await spotifyApi.startPlayback(deviceId, undefined, undefined, undefined);
     } catch (error) {
-      console.error("Error resuming playback:", error);
+      console.error("Failed to resume playback:", error);
     }
-  }, [player]);
+  }, [deviceId]);
 
   // Toggle play/pause
   const togglePlay = useCallback(async () => {
-    try {
-      if (player) {
-        await player.togglePlay();
-      }
-    } catch (error) {
-      console.error("Error toggling playback:", error);
+    const state = playbackState as { paused?: boolean } | null;
+    if (!state) return;
+    if (state.paused) {
+      await resume();
+    } else {
+      await pause();
     }
-  }, [player]);
+  }, [playbackState, resume, pause]);
 
   // Next track
   const nextTrack = useCallback(async () => {
+    if (!deviceId) return;
     try {
-      if (player) {
-        await player.nextTrack();
-      }
+      await spotifyApi.skipToNext(deviceId);
     } catch (error) {
-      console.error("Error skipping to next track:", error);
+      console.error("Failed to skip to next track:", error);
     }
-  }, [player]);
+  }, [deviceId]);
 
   // Previous track
   const previousTrack = useCallback(async () => {
+    if (!deviceId) return;
     try {
-      if (player) {
-        await player.previousTrack();
-      }
+      await spotifyApi.skipToPrevious(deviceId);
     } catch (error) {
-      console.error("Error skipping to previous track:", error);
+      console.error("Failed to skip to previous track:", error);
     }
-  }, [player]);
+  }, [deviceId]);
 
   // Seek
   const seek = useCallback(
     async (positionMs: number) => {
+      if (!deviceId) return;
       try {
-        if (player) {
-          await player.seek(positionMs);
-        }
+        await spotifyApi.seekToPosition(positionMs, deviceId);
       } catch (error) {
-        console.error("Error seeking playback position:", error);
+        console.error("Failed to seek:", error);
       }
     },
-    [player],
+    [deviceId],
   );
 
   // Set volume
   const setVolume = useCallback(
     async (volumePercent: number) => {
+      if (!deviceId) return;
+      const clampedVolume = Math.max(
+        0,
+        Math.min(100, Math.round(volumePercent)),
+      );
       try {
-        if (player) {
-          await player.setVolume(volumePercent);
-        }
+        console.warn(
+          "'setPlaybackVolume' functionality not implemented in spotifyApi module.",
+        );
       } catch (error) {
-        console.error("Error setting volume:", error);
+        console.error("Failed to set volume:", error);
       }
     },
-    [player],
+    [deviceId],
   );
 
+  // Context value
+  const value: SpotifyContextType = {
+    isAuthenticated,
+    isPlayerReady,
+    isPremium,
+    deviceId,
+    currentTrack,
+    playbackState,
+    login,
+    logout: logoutUser,
+    play,
+    pause,
+    resume,
+    togglePlay,
+    nextTrack,
+    previousTrack,
+    seek,
+    setVolume,
+    player,
+    openSpotifyApp,
+  };
+
   return (
-    <SpotifyContext.Provider
-      value={{
-        isAuthenticated,
-        isPlayerReady,
-        isPremium,
-        deviceId,
-        currentTrack,
-        playbackState,
-        login,
-        logout,
-        play,
-        pause,
-        resume,
-        togglePlay,
-        nextTrack,
-        previousTrack,
-        seek,
-        setVolume,
-        player,
-        openSpotifyApp,
-      }}
-    >
-      {children}
-    </SpotifyContext.Provider>
+    <SpotifyContext.Provider value={value}>{children}</SpotifyContext.Provider>
   );
 }
 

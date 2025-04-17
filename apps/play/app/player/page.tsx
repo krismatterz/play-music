@@ -4,108 +4,132 @@ import Image from "next/image";
 import PlaylistItem from "../../components/ui/PlaylistItem";
 import { useState, useEffect } from "react";
 import { usePlayer } from "../../context/PlayerContext";
+import type { DisplayableTrack } from "../../context/PlayerContext";
+import { formatDuration } from "../../utils/formatDuration";
 
-// Mock data for the playlist
-const playlist = [
+// Mock data for the playlist (Add url for local playback)
+const playlist: DisplayableTrack[] = [
   {
-    id: "0",
+    id: "local-0",
     title: "Invencible",
     artist: "Eladio Carrión",
     album: "DON KBRN",
     cover: "/landing/Eladio_DON_KBRN_Cover.png",
-    duration: "3:24",
+    durationMs: 204000, // Example duration in ms (3:24)
+    url: "/music/Eladio Carrión - Invencible.mp3",
     explicit: true,
   },
   {
-    id: "1",
+    id: "local-1",
     title: "Weightless",
     artist: "Martin Garrix",
     album: "Weightless - Single",
     cover: "/landing/Martin_Garrix_Weightless_Cover.png",
-    duration: "3:43",
+    durationMs: 223000, // 3:43
+    url: "/music/Martin Garrix & Arjit Singh - Weightless.mp3",
   },
   {
-    id: "2",
+    id: "local-2",
     title: "Thana",
     artist: "Tayna",
     album: "Thana - Single",
     cover: "/landing/Tayna_Thana_Cover.png",
-    duration: "3:25",
+    durationMs: 205000, // 3:25
+    url: "/music/Tayna - Thana.mp3",
   },
   {
-    id: "3",
+    id: "local-3",
     title: "frente al mar",
     artist: "Béele",
     album: "frente al mar - EP",
     cover: "/landing/Bélee_frente_al_mar_Cover.png",
-    duration: "2:45",
+    durationMs: 165000, // 2:45
+    url: "/music/Beéle - frente al mar.mp3",
   },
   {
-    id: "4",
+    id: "local-4",
     title: "PERFuMITO NUEVO",
     artist: "Bad Bunny",
     album: "DONDE TM FANTASMA",
     cover: "/landing/Bad_Bunny_DTMF_Cover.png",
-    duration: "3:21",
+    durationMs: 201000, // 3:21
+    url: "/music/BAD BUNNY ft. RaiNao - PERFuMITO NUEVO.mp3",
     explicit: true,
   },
   {
-    id: "5",
+    id: "local-5",
     title: "Work",
     artist: "Anyma",
     album: "Work - Single",
     cover: "/landing/Anyma_Work_Cover.png",
-    duration: "2:54",
+    durationMs: 174000, // 2:54
+    url: "/music/Anyma - Work (feat. Yeat).mp3",
     explicit: true,
   },
 ];
 
 export default function Player() {
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const { setCurrentTrack } = usePlayer();
+  // Remove local isPlaying state
+  // const [isPlaying, setIsPlaying] = useState(true);
 
-  // Make sure currentTrack is always defined
-  const currentTrack = playlist[currentTrackIndex] ?? playlist[0];
+  // Get player state and actions from context
+  const {
+    currentTrack: contextCurrentTrack,
+    isPlaying,
+    play,
+    pause,
+    resume,
+  } = usePlayer();
 
-  // Set the current track in context when it changes
-  useEffect(() => {
-    if (currentTrack) {
-      setCurrentTrack({
-        title: currentTrack.title,
-        artist: currentTrack.artist,
-        cover: currentTrack.cover,
-        duration: currentTrack.duration,
-        explicit: currentTrack.explicit,
-        album: currentTrack.album,
-      });
-    }
-  }, [currentTrack, setCurrentTrack]);
+  // Local state to track which *list item* was selected, not the *playing* track
+  // Defaults to showing the first track's details if nothing is playing yet
+  const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
+  const displayTrack =
+    contextCurrentTrack ?? playlist[selectedTrackIndex] ?? playlist[0];
+
+  // REMOVED useEffect that called setCurrentTrack
 
   const handleTrackClick = (index: number) => {
-    setCurrentTrackIndex(index);
-    setIsPlaying(true);
+    const trackToPlay = playlist[index];
+    if (trackToPlay && trackToPlay.url) {
+      setSelectedTrackIndex(index); // Update which track details are shown initially
+      // Call the context play function for local playback
+      play({ source: "local", track: trackToPlay }).catch(console.error);
+    } else {
+      console.warn("Clicked track is missing URL:", trackToPlay);
+    }
   };
 
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  // Use context actions for the main play/pause button
+  const handleTogglePlayPause = () => {
+    if (isPlaying) {
+      pause().catch(console.error);
+    } else {
+      // Only resume if there's a track loaded in context
+      if (contextCurrentTrack) {
+        resume().catch(console.error);
+      } else {
+        // If nothing is loaded, play the first track from the list
+        handleTrackClick(0);
+      }
+    }
   };
 
-  // Update document title with current track
+  // Update document title with current track from context or displayTrack
   useEffect(() => {
-    document.title = `${currentTrack?.title} • ${currentTrack?.artist} | Play`;
-  }, [currentTrack]);
+    document.title = `${displayTrack?.title ?? "Player"} • ${displayTrack?.artist ?? "Play"} | Play`;
+  }, [displayTrack]);
 
   return (
     <div className="h-full w-full overflow-auto pb-8">
-      {/* Header */}
+      {/* Header uses displayTrack for initial view before context loads */}
       <div className="relative h-80 w-full bg-gradient-to-b from-amber-900 to-black">
         <div className="absolute inset-0 flex items-end p-8">
           <div className="flex items-end gap-6">
             <div className="relative h-48 w-48 overflow-hidden rounded-lg shadow-2xl">
               <Image
-                src={currentTrack?.cover ?? ""}
-                alt={currentTrack?.title ?? ""}
+                src={displayTrack?.cover ?? "/placeholder-cover.png"} // Use placeholder
+                alt={displayTrack?.title ?? "Playlist cover"}
                 fill
                 className="object-cover"
               />
@@ -127,11 +151,12 @@ export default function Player() {
 
       {/* Playlist Content */}
       <div className="bg-gradient-to-b from-black/60 to-black p-8">
-        {/* Controls */}
+        {/* Controls use context state/actions */}
         <div className="mb-8 flex items-center gap-6">
           <button
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-black"
-            onClick={togglePlayPause}
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-black disabled:opacity-50"
+            onClick={handleTogglePlayPause}
+            disabled={!contextCurrentTrack && playlist.length === 0} // Disable if nothing to play
           >
             {isPlaying ? (
               <svg
@@ -161,8 +186,9 @@ export default function Player() {
               </svg>
             )}
           </button>
-
+          {/* Like/Download buttons (currently non-functional) */}
           <button className="rounded-full p-2 text-2xl text-white/60 hover:text-white">
+            {/* ... Like icon ... */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -172,8 +198,8 @@ export default function Player() {
               <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
             </svg>
           </button>
-
           <button className="rounded-full p-2 text-2xl text-white/60 hover:text-white">
+            {/* ... Download icon ... */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -197,21 +223,28 @@ export default function Player() {
           <div>Duration</div>
         </div>
 
-        {/* Playlist Items */}
+        {/* Playlist Items - use context isPlaying and currentTrack.id */}
         <div className="space-y-1">
           {playlist.map((track, index) => (
             <PlaylistItem
-              key={`${track.title}-${index}`}
-              track={track}
+              key={track.id}
+              track={{
+                title: track.title,
+                artist: track.artist,
+                album: track.album,
+                cover: track.cover,
+                duration: formatDuration(track.durationMs ?? 0),
+                explicit: track.explicit,
+              }}
               index={index + 1}
-              isPlaying={index === currentTrackIndex && isPlaying}
+              isPlaying={contextCurrentTrack?.id === track.id && isPlaying}
               onClick={() => handleTrackClick(index)}
               songId={track.id}
             />
           ))}
         </div>
 
-        {/* AI Recommendation Section */}
+        {/* AI Recommendation Section (unchanged) */}
         <div className="mt-12">
           <h2 className="mb-6 text-2xl font-bold text-white">
             Recommended for you
