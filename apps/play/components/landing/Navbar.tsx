@@ -29,6 +29,7 @@ const Navbar: React.FC = () => {
     const handleEnter = () => {
       notesRef.current.forEach((note, i) => {
         if (note) {
+          gsap.killTweensOf(note);
           gsap.to(note, {
             opacity: 1,
             y: -24,
@@ -43,6 +44,7 @@ const Navbar: React.FC = () => {
     const handleLeave = () => {
       notesRef.current.forEach((note, i) => {
         if (note) {
+          gsap.killTweensOf(note);
           gsap.to(note, {
             opacity: 0,
             y: 20,

@@ -1,29 +1,145 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { IconArrowRight, IconPlayerPlay } from "@tabler/icons-react";
 
+// Hero background component with animated elements
+export const HeroBackground: React.FC = () => {
+  const [circles, setCircles] = React.useState<
+    {
+      left: string;
+      top: string;
+      width: string;
+      height: string;
+      animationDuration: string;
+      animationDelay: string;
+      animationTimingFunction: string;
+      animationIterationCount: string;
+      animationDirection: string;
+      animationName: string;
+    }[]
+  >([]);
+
+  React.useEffect(() => {
+    const generated = Array.from({ length: 12 }).map((_, i) => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      width: `${Math.random() * 400 + 100}px`,
+      height: `${Math.random() * 400 + 100}px`,
+      animationDuration: `${Math.random() * 10 + 10}s`,
+      animationDelay: `${Math.random() * 5}s`,
+      animationTimingFunction: "ease-in-out",
+      animationIterationCount: "infinite",
+      animationDirection: "alternate",
+      animationName: i % 2 === 0 ? "float1" : "float2",
+    }));
+    setCircles(generated);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 -z-10 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-amber-950 to-black"></div>
+      {/* Animated circles */}
+      <div className="absolute inset-0 opacity-30">
+        {circles.length
+          ? circles.map((style, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-gradient-to-br from-amber-700/20 to-amber-300/20 blur-3xl"
+                style={style}
+              />
+            ))
+          : Array.from({ length: 12 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-gradient-to-br from-amber-700/20 to-amber-300/20 blur-3xl"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  width: "200px",
+                  height: "200px",
+                }}
+              />
+            ))}
+      </div>
+      {/* Sound wave effect */}
+      <div className="absolute right-0 bottom-0 left-0 h-32 opacity-20">
+        {Array.from({ length: 40 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute bottom-0 bg-amber-700"
+            style={{
+              left: `${i * 2.5}%`,
+              height: `${Math.sin(i * 0.2) * 50 + 50}px`,
+              width: "8px",
+              borderRadius: "4px",
+              animationName: "soundWave",
+              animationDuration: "1.5s",
+              animationIterationCount: "infinite",
+              animationDelay: `${i * 0.05}s`,
+            }}
+          />
+        ))}
+      </div>
+      <style jsx global>{`
+        @keyframes float1 {
+          0% {
+            transform: translate(0, 0) scale(1);
+          }
+          100% {
+            transform: translate(50px, 50px) scale(1.2);
+          }
+        }
+        @keyframes float2 {
+          0% {
+            transform: translate(0, 0) scale(1.2);
+          }
+          100% {
+            transform: translate(-50px, -50px) scale(1);
+          }
+        }
+        @keyframes soundWave {
+          0%,
+          100% {
+            height: 20px;
+          }
+          50% {
+            height: 80px;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 // App preview component with parallax effect
-const AppPreview: React.FC = () => {
+export const AppPreview: React.FC = () => {
   const previewRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!previewRef.current) return;
+
       const { left, top, width, height } =
         previewRef.current.getBoundingClientRect();
       const x = (e.clientX - left) / width - 0.5;
       const y = (e.clientY - top) / height - 0.5;
+
       previewRef.current.style.transform = `perspective(1000px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg)`;
     };
+
     const handleMouseLeave = () => {
       if (!previewRef.current) return;
       previewRef.current.style.transform =
         "perspective(1000px) rotateY(0deg) rotateX(0deg)";
       previewRef.current.style.transition = "transform 0.5s ease";
     };
+
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseleave", handleMouseLeave);
+
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseleave", handleMouseLeave);
@@ -33,11 +149,11 @@ const AppPreview: React.FC = () => {
   return (
     <div
       ref={previewRef}
-      className="relative w-full max-w-md overflow-hidden rounded-xl border border-white/10 bg-black shadow-2xl transition-transform duration-300 ease-out"
+      className="relative w-full max-w-md overflow-hidden rounded-xl border border-black/20 bg-transparent shadow-2xl transition-transform duration-300 ease-out"
       style={{ transformStyle: "preserve-3d" }}
     >
       {/* App interface mockup */}
-      <div className="bg-gradient-to-b from-amber-950 to-black p-4">
+      <div className="bg-gradient-to-b from-amber-800 to-black p-4">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <IconPlayerPlay size={18} className="text-amber-700" />
@@ -45,6 +161,7 @@ const AppPreview: React.FC = () => {
           </div>
           <div className="h-6 w-24 rounded-full bg-white/10"></div>
         </div>
+
         {/* Currently playing */}
         <div className="mb-4 rounded-lg bg-white/5 p-3">
           <div className="flex items-center gap-3">
@@ -57,6 +174,7 @@ const AppPreview: React.FC = () => {
             </div>
           </div>
         </div>
+
         {/* Playlist rows */}
         {Array.from({ length: 5 }).map((_, i) => (
           <div
@@ -71,6 +189,7 @@ const AppPreview: React.FC = () => {
             <div className="ml-auto text-xs text-neutral-400">3:2{i}</div>
           </div>
         ))}
+
         {/* AI suggestion */}
         <div className="mt-4 rounded-lg bg-gradient-to-r from-amber-900/30 to-amber-300/30 p-3">
           <div className="mb-1 bg-gradient-to-r from-purple-600 via-amber-600 via-15% to-amber-300 bg-clip-text text-xs font-bold text-transparent">
