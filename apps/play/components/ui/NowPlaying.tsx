@@ -1,12 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import ExplicitBadge from "./ExplicitBadge";
 import { usePlayer } from "../../context/PlayerContext";
+import { useSpotify } from "../../context/SpotifyContext";
 
 const NowPlaying: React.FC = () => {
   const { currentTrack, isPlaying, togglePlayPause } = usePlayer();
+  const spotify = useSpotify();
+  const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(50);
+  const [currentTime, setCurrentTime] = useState("0:00");
 
   // Use default track if no track is set in context
   const track = currentTrack ?? {
@@ -18,8 +23,113 @@ const NowPlaying: React.FC = () => {
     explicit: true,
   };
 
+  // Update progress bar based on playback state
+  useEffect(() => {
+    if (!spotify.playbackState) return;
+
+    const updateProgress = () => {
+      if (!spotify.playbackState) return;
+
+      const durationMs = spotify.playbackState.duration;
+      const positionMs = spotify.playbackState.position;
+
+      if (durationMs && positionMs) {
+        setProgress((positionMs / durationMs) * 100);
+
+        // Format current time
+        const minutes = Math.floor(positionMs / 60000);
+        const seconds = Math.floor((positionMs % 60000) / 1000);
+        setCurrentTime(`${minutes}:${seconds < 10 ? "0" : ""}${seconds}`);
+      }
+    };
+
+    // Update immediately
+    updateProgress();
+
+    // Update every second if playing
+    let interval: NodeJS.Timeout;
+    if (isPlaying) {
+      interval = setInterval(updateProgress, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [spotify.playbackState, isPlaying]);
+
+  // Initial volume
+  useEffect(() => {
+    const getInitialVolume = async () => {
+      if (spotify.isPlayerReady && spotify.player) {
+        const playerVolume = await spotify.player.getVolume();
+        if (playerVolume !== undefined) {
+          setVolume(Math.round(playerVolume * 100));
+        }
+      }
+    };
+
+    void getInitialVolume();
+  }, [spotify.isPlayerReady, spotify.player]);
+
+  // Handle volume change
+  const handleVolumeChange = async (newVolume: number) => {
+    setVolume(newVolume);
+    await spotify.setVolume(newVolume);
+  };
+
+  // Handle play/pause
+  const handlePlayPause = async () => {
+    togglePlayPause();
+    if (isPlaying) {
+      await spotify.pause();
+    } else {
+      await spotify.resume();
+    }
+  };
+
+  // Handle next/previous track
+  const handleNextTrack = async () => {
+    await spotify.nextTrack();
+  };
+
+  const handlePreviousTrack = async () => {
+    await spotify.previousTrack();
+  };
+
+  // Handle seek
+  const handleSeek = async (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!spotify.playbackState) return;
+
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const width = rect.width;
+    const seekPositionPercent = offsetX / width;
+
+    const durationMs = spotify.playbackState.duration;
+    const seekPositionMs = Math.floor(durationMs * seekPositionPercent);
+
+    await spotify.seek(seekPositionMs);
+  };
+
+  // Login with Spotify if not authenticated
+  const handleLogin = async () => {
+    if (!spotify.isAuthenticated) {
+      await spotify.login();
+    }
+  };
+
   return (
     <div className="flex flex-col items-center">
+      {!spotify.isAuthenticated ? (
+        <button
+          onClick={handleLogin}
+          className="mb-4 rounded-full bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
+        >
+          Connect with Spotify
+        </button>
+      ) : null}
+
       {/* Album Cover */}
       <div className="relative mb-4 h-64 w-64 overflow-hidden rounded-lg shadow-lg">
         <Image
@@ -41,14 +151,17 @@ const NowPlaying: React.FC = () => {
 
       {/* Progress Bar */}
       <div className="mb-4 w-full space-y-1">
-        <div className="h-1 w-full overflow-hidden rounded-full bg-white/20">
+        <div
+          className="h-1 w-full cursor-pointer overflow-hidden rounded-full bg-white/20"
+          onClick={spotify.isPlayerReady ? handleSeek : undefined}
+        >
           <div
             className="h-full rounded-full bg-white"
-            style={{ width: "45%" }}
+            style={{ width: `${progress}%` }}
           ></div>
         </div>
         <div className="flex justify-between text-xs text-neutral-400">
-          <span>{track.currentTime ?? "0:00"}</span>
+          <span>{currentTime}</span>
           <span>{track.duration}</span>
         </div>
       </div>
@@ -67,7 +180,11 @@ const NowPlaying: React.FC = () => {
           </svg>
         </button>
         {/* Previous */}
-        <button className="rounded-full p-2 text-neutral-400 hover:text-white">
+        <button
+          className="rounded-full p-2 text-neutral-400 hover:text-white"
+          onClick={spotify.isPlayerReady ? handlePreviousTrack : undefined}
+          disabled={!spotify.isPlayerReady}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -80,7 +197,7 @@ const NowPlaying: React.FC = () => {
         {/* Play/Pause */}
         <button
           className="rounded-full bg-white p-3 text-black"
-          onClick={togglePlayPause}
+          onClick={spotify.isPlayerReady ? handlePlayPause : togglePlayPause}
         >
           {isPlaying ? (
             <svg
@@ -111,7 +228,11 @@ const NowPlaying: React.FC = () => {
           )}
         </button>
         {/* Next */}
-        <button className="rounded-full p-2 text-neutral-400 hover:text-white">
+        <button
+          className="rounded-full p-2 text-neutral-400 hover:text-white"
+          onClick={spotify.isPlayerReady ? handleNextTrack : undefined}
+          disabled={!spotify.isPlayerReady}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -159,10 +280,20 @@ const NowPlaying: React.FC = () => {
         {/* Volume */}
         <div className="flex items-center gap-1">
           {/* Volume Bar */}
-          <div className="h-1 w-20 overflow-hidden rounded-full bg-white/20">
+          <div
+            className="h-1 w-20 cursor-pointer overflow-hidden rounded-full bg-white/20"
+            onClick={(e) => {
+              const volumeBar = e.currentTarget;
+              const rect = volumeBar.getBoundingClientRect();
+              const offsetX = e.clientX - rect.left;
+              const width = rect.width;
+              const newVolume = Math.round((offsetX / width) * 100);
+              void handleVolumeChange(newVolume);
+            }}
+          >
             <div
               className="h-full rounded-full bg-white"
-              style={{ width: "70%" }}
+              style={{ width: `${volume}%` }}
             ></div>
           </div>
         </div>

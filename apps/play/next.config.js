@@ -5,6 +5,9 @@
 import "./env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  reactStrictMode: true,
+  transpilePackages: ["supabase"], // Ensure Supabase package is transpiled
+};
 
 export default config;
