@@ -1,9 +1,7 @@
-import type { Config } from 'tailwindcss';
-import sharedConfig from '@play/tailwind-config'; // Use shared config alias
+import type { Config } from "tailwindcss";
 
-const config: Pick<Config, 'content' | 'presets'> = {
-  content: ['./src/**/*.tsx'],
-  presets: [sharedConfig],
+const config: Pick<Config, "content" | "presets"> = {
+  content: ["./src/**/*.tsx"],
 };
 
 export default config;

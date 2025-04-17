@@ -264,16 +264,15 @@ const Navbar: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="rounded-full bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:bg-white/20"
+            className="rounded-full border border-amber-700 bg-transparent px-4 py-2 text-sm text-white transition-colors hover:bg-amber-900/40"
           >
-            Features
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="rounded-full bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:bg-white/20"
-          >
-            Pricing
+            <Link
+              href="http://localhost:3001"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Artist Dashboard
+            </Link>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
