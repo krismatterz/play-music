@@ -174,11 +174,11 @@ export function Sidebar() {
               </div>
             </div>
 
-            {/* Navigation items section - Adjust padding and center when collapsed */}
+            {/* Navigation items section - Remove items-center and adjust padding */}
             <div
               className={cn(
-                "flex flex-1 flex-col space-y-1",
-                isCollapsed ? "items-center px-2 py-4" : "p-4",
+                "flex flex-1 flex-col space-y-1 p-4", // Keep p-4 for both states, remove conditional padding/items-center
+                // isCollapsed ? "items-center px-2 py-4" : "p-4", // Old style
               )}
             >
               {sidebarItems.map((item) => {
@@ -189,13 +189,26 @@ export function Sidebar() {
                   <Button
                     key={item.href}
                     variant="ghost"
-                    className={`hover:bg-accent relative h-9 overflow-hidden rounded-md px-0 ${
-                      isCollapsed ? "w-9" : "w-full"
-                    } ${isActive ? "bg-primary hover:bg-primary text-primary-foreground" : ""}`}
+                    // Ensure button takes full width in both states for consistent layout start
+                    // Apply w-full regardless of collapsed state, padding handled internally
+                    // Remove justify-start from Button, handle alignment in inner div
+                    className={cn(
+                      "hover:bg-accent relative h-9 w-full overflow-hidden rounded-md px-0", // REMOVED justify-start
+                      isActive
+                        ? "bg-primary hover:bg-primary text-primary-foreground"
+                        : "",
+                    )}
                     asChild
                   >
                     <Link href={item.href}>
-                      <div className="flex h-full w-full items-center">
+                      {/* Apply conditional justify-center here */}
+                      <div
+                        className={cn(
+                          "flex h-full w-full items-center",
+                          isCollapsed ? "justify-center" : "",
+                        )}
+                      >
+                        {/* Icon container stays fixed width */}
                         <div className="flex h-full w-9 shrink-0 items-center justify-center">
                           <Icon className="h-5 w-5" />
                         </div>
@@ -221,40 +234,51 @@ export function Sidebar() {
               })}
             </div>
 
-            {/* Bottom utilities section - Adjust padding and center when collapsed */}
+            {/* Bottom utilities section - Remove items-center and adjust padding */}
             <div className="mt-auto border-t">
               <div
                 className={cn(
-                  "flex w-full flex-col gap-1",
-                  isCollapsed ? "items-center px-2 py-4" : "p-4",
+                  "flex w-full flex-col gap-1 p-4", // Keep p-4 for both states, remove conditional padding/items-center
+                  // isCollapsed ? "items-center px-2 py-4" : "p-4", // Old style
                 )}
               >
-                {/* Theme selectors - Centering handled below */}
+                {/* Theme selectors - Ensure consistent alignment */}
                 <div
                   className={cn(
                     "w-full",
+                    // isCollapsed ? "flex justify-center" : "items-center justify-between", // Old style
+                    "flex", // Use flex for layout
                     isCollapsed
-                      ? "flex justify-center"
-                      : "items-center justify-between",
+                      ? "justify-center"
+                      : "items-center justify-between", // Center only icon when collapsed
                   )}
                 >
                   <ThemeToggle showIcons collapsed={isCollapsed} />
                 </div>
 
-                {/* User profile section - Apply items-center here */}
+                {/* User profile section - Remove items-center from parent */}
                 <div
                   className={cn(
                     "flex w-full flex-col gap-1 border-t pt-2",
-                    isCollapsed ? "items-center" : "",
+                    // isCollapsed ? "items-center" : "", // Old style - removed items-center
                   )}
                 >
                   <Button
                     variant="ghost"
-                    className={`hover:bg-accent relative h-9 overflow-hidden rounded-md px-0 ${
-                      isCollapsed ? "w-9" : "w-full"
-                    }`}
+                    // Ensure button takes full width in both states
+                    // Remove justify-start from Button, handle alignment in inner div
+                    className={cn(
+                      "hover:bg-accent relative h-9 w-full overflow-hidden rounded-md px-0", // REMOVED justify-start
+                    )}
                   >
-                    <div className="flex h-full w-full items-center">
+                    {/* Apply conditional justify-center here */}
+                    <div
+                      className={cn(
+                        "flex h-full w-full items-center",
+                        isCollapsed ? "justify-center" : "",
+                      )}
+                    >
+                      {/* Icon container stays fixed width */}
                       <motion.div
                         layout
                         transition={{ duration: 0.3 }}
@@ -286,12 +310,22 @@ export function Sidebar() {
                   <Button
                     variant="ghost"
                     disabled={isLoggingOut}
-                    className={`hover:bg-accent relative h-9 overflow-hidden rounded-md px-0 ${
-                      isCollapsed ? "w-9" : "w-full"
-                    }`}
+                    // Ensure button takes full width in both states
+                    // Remove justify-start from Button, handle alignment in inner div
+                    className={cn(
+                      "hover:bg-accent relative h-9 w-full overflow-hidden rounded-md px-0", // REMOVED justify-start
+                      isLoggingOut ? "cursor-not-allowed opacity-50" : "",
+                    )}
                     onClick={handleLogout}
                   >
-                    <div className="flex h-full w-full items-center">
+                    {/* Apply conditional justify-center here */}
+                    <div
+                      className={cn(
+                        "flex h-full w-full items-center",
+                        isCollapsed ? "justify-center" : "",
+                      )}
+                    >
+                      {/* Icon container stays fixed width */}
                       <motion.div
                         layout
                         transition={{ duration: 0.3 }}

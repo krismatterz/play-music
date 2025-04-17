@@ -4,6 +4,13 @@
 
 ### Empowering artists and promoting all cultures
 
+### What's Play?
+
+Play is a Music App like Spotify focused on Users and Artists.
+Users can play music based on Cultures, Moods or playlists.
+Artists can promote their upcoming songs and track analytics.
+Manage music, credits, lyrics and follow revenue.
+
 ## Getting Started
 
 This monorepo contains two Next.js applications built with the [T3 Stack](https://create.t3.gg/), [Bun](https://bun.sh/) for package management, [Supabase](https://supabase.com) for the Database and [Clerk](https://clerk.com) for Auth
