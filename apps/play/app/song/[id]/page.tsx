@@ -3,21 +3,20 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import {
-  usePlayerState,
-  usePlayerActions,
-} from "../../../context/PlayerContext";
+import { usePlayerActions } from "../../../context/PlayerContext";
+import type { DisplayableTrack } from "../../../context/PlayerContext";
 import ExplicitBadge from "../../../components/ui/ExplicitBadge";
 
 // Mock data for the songs
 const songs = [
   {
-    id: "0",
+    id: "local-0",
     title: "Invencible",
     artist: "Eladio Carrión",
     album: "DON KBRN",
     cover: "/landing/Eladio_DON_KBRN_Cover.png",
     duration: "3:24",
+    url: "/music/Eladio Carrión - Invencible.mp3",
     explicit: true,
     releaseYear: 2025,
     genres: ["Reggaeton", "Latin Trap"],
@@ -25,48 +24,52 @@ const songs = [
       "Yeah\nYo me siento invencible cada ve' que abro mis fuckin' dos ojo'\nNunca me gustó el deporte en equipo, puedo solo\nTengo frío en mi alma, junio en Palermo Soho\nCreo mucho en el karma y que con calma llega solo\nEsto fue cero suerte, trabajé y se me dio\nNo me digan \"rey del trap\", solo existe un rey, es Dios\nAprendí que no todo el dinero es bueno\nY 'toy haciendo lo mejor que puedo con el don que me regaló\nUn día hablé con Él, yo ni lo busqué, Él me llamó\nMe dijo: \"Tú ere' el más duro, eso te lo aseguro yo\"\nY desde ese día yo no he vuelto a coger lucha\nAunque a vece' no responde, sé que siempre me escucha\nDice: \"Eladio, no, tú no te deje'\nTú ere' un guerrero, no hay quien te aconseje\nY se pasa por cosa', pero mírate ahora\nTú aguanta' lo que sea, no te la puse difícil, yo te puse a ti más fuerte\", yeah\n\nY ya me siento como Hércule'\nRecuerdo cuando yo le dije a papi: \"Lo logré\"\nTodo esto yo lo fríamente calculé\nPero sobre todo, tuve fe",
   },
   {
-    id: "1",
+    id: "local-1",
     title: "Weightless",
     artist: "Martin Garrix",
     album: "Weightless - Single",
     cover: "/landing/Martin_Garrix_Weightless_Cover.png",
     duration: "3:43",
+    url: "/music/Martin Garrix & Arjit Singh - Weightless.mp3",
     releaseYear: 2025,
     genres: ["EDM", "Dance"],
     lyrics:
       "Feeling weightless...\nAs we're falling through the sky...\nNothing holding us down...",
   },
   {
-    id: "2",
+    id: "local-2",
     title: "Thana",
     artist: "Tayna",
     album: "Thana - Single",
     cover: "/landing/Tayna_Thana_Cover.png",
     duration: "3:25",
+    url: "/music/Tayna - Thana.mp3",
     releaseYear: 2025,
     genres: ["Amapiano", "Albanian Pop"],
     lyrics:
       "When the lights go down...\nI'll be there waiting...\nJust call my name...",
   },
   {
-    id: "3",
+    id: "local-3",
     title: "frente al mar",
     artist: "Béele",
     album: "frente al mar - EP",
     cover: "/landing/Bélee_frente_al_mar_Cover.png",
     duration: "2:45",
+    url: "/music/Beéle - frente al mar.mp3",
     releaseYear: 2025,
     genres: ["Latin Pop", "Reggaeton"],
     lyrics:
       "Frente al mar...\nMirando las olas llegar...\nPienso en ti una vez más...",
   },
   {
-    id: "4",
+    id: "local-4",
     title: "PERFuMITO NUEVO",
     artist: "Bad Bunny",
     album: "DONDE TM FANTASMA",
     cover: "/landing/Bad_Bunny_DTMF_Cover.png",
     duration: "3:21",
+    url: "/music/BAD BUNNY ft. RaiNao - PERFuMITO NUEVO.mp3",
     explicit: true,
     releaseYear: 2025,
     genres: ["Latin Trap", "Reggaeton"],
@@ -74,12 +77,13 @@ const songs = [
       "Nuevo perfume, nueva actitud...\nYa no pienso más en tu ingratitud...\nAhora soy yo quien vive su juventud...",
   },
   {
-    id: "5",
+    id: "local-5",
     title: "Work",
     artist: "Anyma",
     album: "Work - Single",
     cover: "/landing/Anyma_Work_Cover.png",
     duration: "2:54",
+    url: "/music/Anyma - Work (feat. Yeat).mp3",
     explicit: true,
     releaseYear: 2025,
     genres: ["EDM", "Melodic Techno"],
@@ -88,10 +92,23 @@ const songs = [
   },
 ];
 
+// Helper function to parse "M:SS" or "MM:SS" to milliseconds
+function parseDurationStringToMs(durationString: string): number | undefined {
+  const parts = durationString.split(":");
+  if (parts.length === 2 && parts[0] && parts[1]) {
+    const minutes = parseInt(parts[0], 10);
+    const seconds = parseInt(parts[1], 10);
+    if (!isNaN(minutes) && !isNaN(seconds)) {
+      return (minutes * 60 + seconds) * 1000;
+    }
+  }
+  return undefined; // Return undefined if format is unexpected or parts missing
+}
+
 export default function SongPage() {
   const params = useParams();
   const router = useRouter();
-  const { currentTrack, setIsPlaying } = usePlayer();
+  const { play } = usePlayerActions();
   const [song, setSong] = useState<(typeof songs)[0] | null>(null);
 
   useEffect(() => {
@@ -102,6 +119,7 @@ export default function SongPage() {
       setSong(foundSong);
       document.title = `${foundSong.title} • ${foundSong.artist} | Play`;
     } else {
+      console.warn(`Song with id ${songId} not found in mock data.`);
       router.push("/player");
     }
   }, [params.id, router]);
@@ -115,15 +133,23 @@ export default function SongPage() {
   }
 
   const playSong = () => {
-    setCurrentTrack({
+    if (!song?.url) {
+      console.error("Cannot play song: URL is missing.", song);
+      return;
+    }
+
+    const trackToPlay: DisplayableTrack = {
+      id: `local-${song.id}`,
       title: song.title,
       artist: song.artist,
       cover: song.cover,
-      duration: song.duration,
-      explicit: song.explicit,
       album: song.album,
-    });
-    setIsPlaying(true);
+      explicit: song.explicit ?? false,
+      durationMs: parseDurationStringToMs(song.duration),
+      url: song.url,
+    };
+
+    play({ source: "local", track: trackToPlay }).catch(console.error);
   };
 
   return (
