@@ -73,15 +73,19 @@ const Navbar: React.FC = () => {
           <span className="text-xl font-bold text-white">Play</span>
         </div>
         <div className="flex items-center gap-4">
-          <button className="rounded-full border border-black bg-[#F8F3F2] px-4 py-2 text-sm font-semibold text-black shadow-sm transition-all hover:border-[#F8F3F2] hover:bg-black hover:text-[#F8F3F2]">
-            <Link
-              href={ARTIST_DASHBOARD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Artist Dashboard
-            </Link>
+          <button className="group relative overflow-hidden rounded-full bg-[#F8F3F2] px-4 py-2 text-sm font-semibold text-black shadow-sm transition-all">
+            <span className="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-200 group-hover:bg-gradient-to-r group-hover:from-purple-800 group-hover:to-amber-600 group-hover:opacity-100" />
+            <span className="relative z-10 transition-colors duration-200 group-hover:bg-clip-text group-hover:text-transparent group-hover:text-white">
+              <Link
+                href={ARTIST_DASHBOARD_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Artist Dashboard
+              </Link>
+            </span>
           </button>
+
           <div className="relative flex items-center">
             {/* Animated music notes for Play Music button */}
             <div className="pointer-events-none absolute -top-7 left-1/2 flex -translate-x-1/2 gap-2">

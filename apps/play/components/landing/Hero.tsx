@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { IconArrowRight, IconPlayerPlay } from "@tabler/icons-react";
+import SmartPlaylistPreview from "./SmartPlaylistPreview";
 
 // Hero background component with animated elements
 export const HeroBackground: React.FC = () => {
@@ -259,7 +260,7 @@ const Hero: React.FC = () => {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="flex justify-center lg:w-1/2"
           >
-            <AppPreview />
+            <SmartPlaylistPreview />
           </motion.div>
         </div>
       </div>
