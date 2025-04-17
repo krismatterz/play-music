@@ -4,9 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  IconBrandSpotify,
-  IconBrandApple,
-  IconMusic,
   IconPlayerPlay,
   IconMicrophone,
   IconDeviceAirpods,
@@ -16,6 +13,7 @@ import {
 } from "@tabler/icons-react";
 import Navbar from "../components/landing/Navbar";
 import Image from "next/image";
+import Hero from "../components/landing/Hero";
 
 // Hero background component with animated elements
 const HeroBackground: React.FC = () => {
@@ -256,68 +254,7 @@ export default function HomePage() {
         <HeroBackground />
 
         {/* Hero Section */}
-        <section className="min-h-screen pt-32 pb-20">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center justify-between gap-12 lg:flex-row">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="lg:w-1/2"
-              >
-                <div className="mb-4 font-medium text-amber-600">
-                  INTRODUCING PLAY
-                </div>
-                <h1 className="mb-6 text-5xl leading-tight font-bold md:text-6xl">
-                  The Next Generation
-                  <span className="bg-gradient-to-r from-amber-600 to-amber-300 bg-clip-text text-transparent">
-                    {" "}
-                    Music Experience
-                  </span>
-                </h1>
-
-                <p className="mb-8 max-w-lg text-xl text-neutral-300">
-                  Discover, enjoy, and interact with music in a new way.
-                  <br />
-                  Play Dance, Latin, Amapiano & Rap music.
-                  <br />
-                  <br />
-                  Feeling in the mood for something specific?
-                </p>
-
-                <div className="flex flex-wrap gap-4">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-6 py-3 font-medium text-white transition-all hover:shadow-lg"
-                  >
-                    <Link href="/player" className="flex items-center gap-2">
-                      Play Music <IconArrowRight size={18} />
-                    </Link>
-                  </motion.button>
-
-                  {/* Not active: Demo button */}
-                  {/* <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="rounded-full border border-white/20 bg-white/10 px-6 py-3 font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
-                  >
-                    Watch Demo
-                  </motion.button> */}
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-                className="flex justify-center lg:w-1/2"
-              >
-                <AppPreview />
-              </motion.div>
-            </div>
-          </div>
-        </section>
+        <Hero />
 
         {/* Platform Integration Section */}
         <section className="py-20">
