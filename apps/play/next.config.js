@@ -5,6 +5,12 @@
 import "./env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  reactStrictMode: true,
+  transpilePackages: ["supabase"], // Ensure Supabase package is transpiled
+  experimental: {
+    externalDir: true, // Allow importing from outside the app directory
+  },
+};
 
 export default config;
