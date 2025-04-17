@@ -63,6 +63,15 @@ create table play.user_follows (
   unique (follower_id, following_id)
 );
 
+-- Table for shared tracks
+create table play.shared_tracks (
+  id uuid primary key default uuid_generate_v4(), -- Use the share ID generated in the API
+  track_data jsonb not null,                     -- Store the shared track metadata
+  created_at timestamp with time zone default now(),
+  view_count integer default 0                   -- Optional: track views
+  -- Optional: add expires_at timestamp with time zone
+);
+
 -- Row Level Security Policies
 
 -- Favorite tracks policies
@@ -172,6 +181,25 @@ create policy "Users can unfollow others"
   on play.user_follows for delete
   using (auth.uid() = follower_id);
 
+-- Shared tracks policies (adjust as needed)
+alter table play.shared_tracks enable row level security;
+
+-- Allow public read access to shared tracks
+create policy "Anyone can view shared tracks" 
+  on play.shared_tracks for select
+  using (true);
+
+-- Allow authenticated users (or service_role) to insert (handled by API route)
+-- Note: The API route uses the service_role key implicitly via createServerClient,
+-- so a specific user-based insert policy might not be strictly needed here if
+-- only the API route creates shares. If users could create shares directly,
+-- you'd add an insert policy based on auth.uid().
+
+-- Example: Allow deletion by service_role only (e.g., for cleanup tasks)
+create policy "Service role can delete shared tracks" 
+  on play.shared_tracks for delete
+  using (auth.role() = 'service_role');
+
 -- Indices for better performance
 create index idx_favorite_tracks_user_id on play.favorite_tracks(user_id);
 create index idx_playlists_user_id on play.playlists(user_id);
@@ -180,6 +208,7 @@ create index idx_listening_history_user_id on play.listening_history(user_id);
 create index idx_listening_history_played_at on play.listening_history(played_at);
 create index idx_user_follows_follower_id on play.user_follows(follower_id);
 create index idx_user_follows_following_id on play.user_follows(following_id);
+create index idx_shared_tracks_created_at on play.shared_tracks(created_at);
 
 -- Function to update updated_at column
 create or replace function play.update_updated_at()

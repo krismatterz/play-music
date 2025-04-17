@@ -15,6 +15,9 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Export types (This is safe)
+export * from "./types";
+
 // User-related functions
 export async function signInWithSpotify() {
   return await supabase.auth.signInWithOAuth({

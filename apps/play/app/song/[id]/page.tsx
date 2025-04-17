@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePlayerActions } from "../../../context/PlayerContext";
 import type { DisplayableTrack } from "../../../context/PlayerContext";
 import ExplicitBadge from "../../../components/ui/ExplicitBadge";
+import type { Track, Artist, Album } from "supabase";
 
 // Mock data for the songs
 const songs = [
@@ -110,6 +111,7 @@ export default function SongPage() {
   const router = useRouter();
   const { play } = usePlayerActions();
   const [song, setSong] = useState<(typeof songs)[0] | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     const songId = params.id as string;
@@ -123,6 +125,67 @@ export default function SongPage() {
       router.push("/player");
     }
   }, [params.id, router]);
+
+  const handleShare = async () => {
+    if (!song || isSharing) return;
+    setIsSharing(true);
+
+    try {
+      const trackData: Omit<Track, "created_at" | "user_id"> = {
+        id: `local-${song.id}`,
+        name: song.title,
+        artists: [{ id: "unknown", name: song.artist }],
+        album: {
+          id: "unknown",
+          name: song.album,
+          images: [{ url: song.cover }],
+        },
+        preview_url: song.url,
+        external_urls: { spotify: "about:blank" },
+        duration_ms: parseDurationStringToMs(song.duration) ?? 0,
+      };
+
+      const response = await fetch("/api/share", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(trackData),
+      });
+
+      if (!response.ok) {
+        // Define an expected error structure
+        interface ErrorResponse {
+          details?: string;
+          error?: string;
+        }
+        // Explicitly assert the type
+        const errorData = (await response.json()) as ErrorResponse;
+        throw new Error(
+          errorData.details ?? errorData.error ?? "Failed to create share link",
+        );
+      }
+
+      // Define expected success structure
+      interface SuccessResponse {
+        shareUrl: string;
+      }
+      // Explicitly assert the type
+      const successData = (await response.json()) as SuccessResponse;
+      const { shareUrl } = successData; // Destructure after assertion
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareUrl);
+      alert(`Share link copied to clipboard: ${shareUrl}`);
+    } catch (error) {
+      console.error("Sharing failed:", error);
+      alert(
+        `Error sharing track: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   if (!song) {
     return (
@@ -223,19 +286,47 @@ export default function SongPage() {
                   </svg>
                 </button>
 
-                <button className="rounded-full p-2 text-2xl text-white/60 hover:text-white">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="h-8 w-8"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M15.75 4.5a3 3 0 11.825 2.066l-8.421 4.679a3.002 3.002 0 010 1.51l8.421 4.679a3 3 0 11-.729 1.31l-8.421-4.678a3 3 0 110-4.132l8.421-4.679a3 3 0 01-.096-.755z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                <button
+                  onClick={handleShare}
+                  disabled={isSharing}
+                  className="rounded-full p-2 text-2xl text-white/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  title="Share Track"
+                >
+                  {isSharing ? (
+                    <svg
+                      className="h-8 w-8 animate-spin text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-8 w-8"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M15.75 4.5a3 3 0 11.825 2.066l-8.421 4.679a3.002 3.002 0 010 1.51l8.421 4.679a3 3 0 11-.729 1.31l-8.421-4.678a3 3 0 110-4.132l8.421-4.679a3 3 0 01-.096-.755z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
