@@ -1,6 +1,6 @@
 {
-  "name": "@play/artist-dashboard",
-  "version": "0.1.0",
+  "name": "play-artist-dashboard",
+  "version": "0.1.19",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,9 +16,6 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.28.1",
     "@clerk/nextjs": "^6.15.1",
-    "@play/tailwind-config": "workspace:*",
-    "@play/ui": "workspace:*",
-    "@play/utils": "workspace:*",
     "@radix-ui/react-slot": "^1.2.0",
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tabler/icons-react": "^3.31.0",

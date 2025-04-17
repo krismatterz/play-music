@@ -1,0 +1,22 @@
+{
+  "name": "supabase",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "main": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.40.0"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./spotify": "./spotify.ts",
+    "./spotify-player": "./spotify-player.ts"
+  }
+}
