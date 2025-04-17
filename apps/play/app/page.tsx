@@ -15,6 +15,11 @@ import {
   IconArrowRight,
 } from "@tabler/icons-react";
 
+const ARTIST_DASHBOARD_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://artist.play-music.app/dashboard"
+    : "http://localhost:3001/dashboard";
+
 // Hero background component with animated elements
 const HeroBackground: React.FC = () => {
   // Store the random positions and sizes for circles in state so they are only generated on the client
@@ -267,7 +272,7 @@ const Navbar: React.FC = () => {
             className="rounded-full border border-amber-700 bg-transparent px-4 py-2 text-sm text-white transition-colors hover:bg-amber-900/40"
           >
             <Link
-              href="http://localhost:3001"
+              href={ARTIST_DASHBOARD_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
