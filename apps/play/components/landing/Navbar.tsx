@@ -32,8 +32,10 @@ const Navbar: React.FC = () => {
           gsap.killTweensOf(note);
           gsap.to(note, {
             opacity: 1,
-            y: -24,
-            x: i * 22 - 22, // spread left to right
+            // Each note is slightly higher than the previous (first is lowest)
+            y: 2 - i * 4, // e.g. 0: -4, 1: -10, 2: -16
+            scale: 1 + i * 0.08, // scale slightly from left (smaller) to right (bigger)
+            transformOrigin: "bottom left",
             duration: 0.5,
             delay: i * 0.08,
             ease: "power2.out",
@@ -74,21 +76,20 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center gap-6">
           {/* Artist Dashboard Button */}
-          <div className="group relative rounded-full bg-white/10 p-[2px] transition-all hover:bg-gradient-to-r hover:from-purple-800 hover:to-amber-600">
-            <button className="relative z-10 flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all">
+          <Link
+            href={ARTIST_DASHBOARD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative rounded-full bg-white/10 p-[2px] transition-all hover:bg-gradient-to-r hover:from-purple-800 hover:to-amber-600 focus:outline-none"
+            tabIndex={0}
+          >
+            <span className="relative z-10 flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all">
               <IconUser size={16} className="text-white" />
-              <Link
-                href={ARTIST_DASHBOARD_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative z-10"
-              >
-                Artist Dashboard
-              </Link>
-            </button>
+              Artist Dashboard
+            </span>
             {/* Optional: Add a pseudo-element for extra shine */}
             <span className="pointer-events-none absolute inset-0 rounded-full" />
-          </div>
+          </Link>
 
           <div className="relative flex items-center">
             {/* Animated music notes for Play Music button */}
@@ -114,15 +115,17 @@ const Navbar: React.FC = () => {
                 </span>
               ))}
             </div>
-            <button
-              ref={playMusicBtnRef}
-              className="rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-6 py-2 text-sm font-bold text-white shadow-lg transition-all hover:from-amber-800 hover:to-amber-500 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none"
+            <Link
+              href="/player"
+              ref={
+                playMusicBtnRef as unknown as React.RefObject<HTMLAnchorElement>
+              }
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-6 py-2 text-sm font-bold text-white shadow-lg transition-all hover:from-amber-800 hover:to-amber-500 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none"
+              tabIndex={0}
             >
-              <span className="flex items-center gap-2">
-                <IconPlayerPlay size={16} />
-                <Link href="/player">Play Music</Link>
-              </span>
-            </button>
+              <IconPlayerPlay size={16} />
+              Play Music
+            </Link>
           </div>
         </div>
       </div>
