@@ -1,27 +1,21 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "../components/ui/button";
-import { ModeToggle as ThemeToggle } from "./theme-toggle";
 import {
   LayoutDashboard,
-  Users,
   Settings,
   ChevronLeft,
-  User,
   LogOut,
   Music,
+  Images,
 } from "lucide-react";
 import { BetaBadge } from "./ui/beta-badge";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useClerk, useUser, UserButton } from "@clerk/nextjs";
 import { cn } from "../lib/utils";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  // ResizableHandle, // Not using a visible handle for now
-} from "./ui/resizable";
+import { ResizablePanelGroup, ResizablePanel } from "./ui/resizable";
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +23,15 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 import { ScrollArea } from "./ui/scroll-area";
+import { Skeleton } from "./ui/skeleton";
+
+// Helper function to get initial state safely on client
+const getInitialCollapsedState = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("sidebarCollapsed") === "true";
+  }
+  return false; // Default server/initial state
+};
 
 // Navigation items are static and memoized outside component
 interface SidebarItem {
@@ -51,7 +54,7 @@ const sidebarItems: SidebarItem[] = [
   {
     title: "Marketing",
     href: "/marketing",
-    icon: Users,
+    icon: Images,
   },
   {
     title: "Settings",
@@ -64,19 +67,23 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut: clerkSignOut } = useClerk();
-  const { user, isLoaded } = useUser();
+  const { isLoaded } = useUser();
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Initialize state directly if possible on client
+  const [isCollapsed, setIsCollapsed] = useState(getInitialCollapsedState());
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
 
+  // useEffect to confirm client-side state AFTER mount - Runs only once
   useEffect(() => {
-    const savedState = localStorage.getItem("sidebarCollapsed");
-    const initialCollapsed = savedState === "true";
-    setIsCollapsed(initialCollapsed);
-    setIsMounted(true);
-  }, []);
+    // Read state again after mount to be sure
+    const savedState = localStorage.getItem("sidebarCollapsed") === "true";
+    // Only update if the initial guess was wrong
+    if (savedState !== isCollapsed) {
+      setIsCollapsed(savedState);
+    }
+  }, [isCollapsed]);
 
+  // Handler to toggle collapse state and save to localStorage
   const handleToggleCollapse = useCallback(() => {
     setIsCollapsed((prevCollapsed) => {
       const newState = !prevCollapsed;
@@ -85,37 +92,17 @@ export function Sidebar() {
     });
   }, []);
 
-  const displayName = useMemo(() => {
-    if (!isLoaded) return "Loading...";
-    return (
-      user?.firstName ??
-      user?.username ??
-      user?.primaryEmailAddress?.emailAddress?.split("@")[0] ??
-      "Artist"
-    );
-  }, [
-    user?.firstName,
-    user?.username,
-    user?.primaryEmailAddress?.emailAddress,
-    isLoaded,
-  ]);
-
   const handleLogout = useCallback(async () => {
     setIsLoggingOut(true);
     try {
-      await clerkSignOut(() => router.push("/"));
+      await clerkSignOut(() => router.push("/sign-in"));
     } catch (error) {
       console.error("Clerk logout failed:", error);
       setIsLoggingOut(false);
     }
   }, [clerkSignOut, router]);
 
-  if (!isMounted) {
-    return (
-      <div className="sticky top-0 hidden h-screen w-[240px] p-6 md:block"></div>
-    );
-  }
-
+  // Render the FULL Resizable Sidebar directly
   return (
     <TooltipProvider delayDuration={0}>
       <div className="sticky top-0 hidden h-screen p-6 md:block">
@@ -124,23 +111,11 @@ export function Sidebar() {
           className="h-full max-w-xs items-stretch rounded-xl border border-neutral-700 bg-black"
         >
           <ResizablePanel
-            defaultSize={20}
+            defaultSize={isCollapsed ? 4 : 20}
             collapsedSize={4}
             collapsible={true}
             minSize={15}
             maxSize={25}
-            onCollapse={() => {
-              if (!isCollapsed) {
-                setIsCollapsed(true);
-                localStorage.setItem("sidebarCollapsed", "true");
-              }
-            }}
-            onExpand={() => {
-              if (isCollapsed) {
-                setIsCollapsed(false);
-                localStorage.setItem("sidebarCollapsed", "false");
-              }
-            }}
             className={cn(
               "flex flex-col !overflow-visible transition-all duration-300 ease-in-out",
               isCollapsed ? "min-w-[68px] items-center" : "min-w-[200px]",
@@ -216,122 +191,138 @@ export function Sidebar() {
               </nav>
             </ScrollArea>
 
-            <div className="mt-auto flex flex-col gap-2 border-t border-neutral-700 p-2">
-              <div
-                className={cn(
-                  isCollapsed
-                    ? "flex justify-center"
-                    : "flex items-center justify-between px-1",
-                )}
-              >
-                <ThemeToggle showIcons={!isCollapsed} collapsed={isCollapsed} />
-              </div>
-
-              {isCollapsed ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 rounded-lg text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                    >
-                      <User className="h-5 w-5" />
-                      <span className="sr-only">Profile</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="border-neutral-700 bg-black text-white"
-                  >
-                    {displayName}
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Button
-                  variant="ghost"
-                  className="group flex items-center justify-start gap-3 rounded-md px-3 py-2 text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                >
-                  <User className="h-5 w-5" />
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                    {displayName}
-                  </span>
-                </Button>
-              )}
-
-              {isCollapsed ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 rounded-lg text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                      onClick={handleLogout}
-                      disabled={isLoggingOut}
-                      aria-label="Logout"
-                    >
-                      {isLoggingOut ? (
-                        <span className="animate-spin">⏳</span>
-                      ) : (
-                        <LogOut className="h-5 w-5" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="border-neutral-700 bg-black text-white"
-                  >
-                    {isLoggingOut ? "Logging out..." : "Logout"}
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <Button
-                  variant="ghost"
-                  className="group flex items-center justify-start gap-3 rounded-md px-3 py-2 text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                >
-                  {isLoggingOut ? (
-                    <span className="animate-spin">⏳</span>
-                  ) : (
-                    <LogOut className="h-5 w-5" />
+            {/* Simplified Footer */}
+            <div className="mt-auto flex flex-col border-t border-neutral-700 p-2">
+              {isLoaded ? (
+                <div
+                  className={cn(
+                    "flex w-full",
+                    // When collapsed: stack vertically centered with gap
+                    // When expanded: UserButton/Collapse on top row, Logout below
+                    isCollapsed
+                      ? "flex-col items-center gap-2"
+                      : "flex-col gap-2",
                   )}
-                  <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
-                </Button>
+                >
+                  {isCollapsed ? (
+                    // --- Collapsed State (Reordered with gap, standardized sizes) ---
+                    <>
+                      {/* Expand Button (Top) */}
+                      <div className="flex w-full justify-center">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                              onClick={handleToggleCollapse}
+                              aria-label="Expand sidebar"
+                            >
+                              <ChevronLeft className="h-4 w-4 rotate-180 transition-transform duration-300" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="right"
+                            className="border-neutral-700 bg-black text-white"
+                          >
+                            Expand
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      {/* User Button (Middle) */}
+                      <div className="flex w-full justify-center">
+                        <UserButton />
+                      </div>
+                      {/* Logout Button (Bottom) - Standardized size */}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            // Standardized size to h-8 w-8
+                            className="h-8 w-8 rounded-lg text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
+                            aria-label="Logout"
+                          >
+                            {isLoggingOut ? (
+                              <span className="animate-spin">⏳</span>
+                            ) : (
+                              <LogOut className="h-5 w-5" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          className="border-neutral-700 bg-black text-white"
+                        >
+                          {isLoggingOut ? "Logging out..." : "Logout"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </>
+                  ) : (
+                    // --- Expanded State (Reordered Vertically) ---
+                    <>
+                      {/* Collapse Button (Styled like nav item) */}
+                      <Button
+                        variant="ghost"
+                        // Mimic nav item styling
+                        className="group flex w-full items-center justify-start gap-2 rounded-md px-2 py-2 text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                        onClick={handleToggleCollapse}
+                        aria-label="Collapse sidebar"
+                      >
+                        {/* Use ChevronLeft, consistent rotation */}
+                        <ChevronLeft className="h-5 w-5 transition-transform duration-300" />
+                        <span>Collapse</span>
+                      </Button>
+
+                      {/* User Button (Centered) - Removed py-2 */}
+                      <div className="flex w-full justify-center">
+                        <UserButton />
+                      </div>
+
+                      {/* Logout Button (Styled like nav item) */}
+                      <Button
+                        variant="ghost"
+                        // Mimic nav item styling
+                        className="group flex w-full items-center justify-start gap-2 rounded-md px-2 py-2 text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                      >
+                        {isLoggingOut ? (
+                          <span className="animate-spin">⏳</span>
+                        ) : (
+                          <LogOut className="h-5 w-5" />
+                        )}
+                        <span>
+                          {isLoggingOut ? "Logging out..." : "Logout"}
+                        </span>
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                // Simplified Skeleton State
+                <div
+                  className={cn(
+                    "flex flex-col gap-2",
+                    isCollapsed ? "items-center" : "items-start",
+                  )}
+                >
+                  <Skeleton className="h-8 w-8 rounded-full" />{" "}
+                  {/* UserButton Placeholder */}
+                  <Skeleton
+                    className={cn(
+                      "rounded-lg",
+                      isCollapsed ? "h-9 w-9" : "h-9 w-[80px]",
+                    )}
+                  />{" "}
+                  {/* Logout Placeholder */}
+                </div>
               )}
 
-              <div
-                className={cn(
-                  "flex w-full pt-2",
-                  isCollapsed ? "justify-center" : "justify-end",
-                )}
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-neutral-400 hover:bg-neutral-800 hover:text-white"
-                      onClick={handleToggleCollapse}
-                      aria-label={
-                        isCollapsed ? "Expand sidebar" : "Collapse sidebar"
-                      }
-                    >
-                      <ChevronLeft
-                        className={cn(
-                          "h-4 w-4 transition-transform duration-300",
-                          isCollapsed && "rotate-180",
-                        )}
-                      />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side={isCollapsed ? "right" : "top"}
-                    className="border-neutral-700 bg-black text-white"
-                  >
-                    {isCollapsed ? "Expand" : "Collapse"}
-                  </TooltipContent>
-                </Tooltip>
-              </div>
+              {/* Collapse/Expand Button logic is now handled within the isLoaded conditional */}
+              {/* {isLoaded && isCollapsed && ( ... )} */}
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
