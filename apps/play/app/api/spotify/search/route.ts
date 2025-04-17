@@ -3,18 +3,18 @@ import { supabase } from "../../../../../../packages/supabase";
 import * as spotifyApi from "../../../../../../packages/supabase/spotify";
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get("q");
+  const types = searchParams.get("types") ?? "track,artist,album,playlist";
+
+  if (!query) {
+    return NextResponse.json(
+      { error: "Query parameter 'q' is required" },
+      { status: 400 },
+    );
+  }
+
   try {
-    // Get the query parameter
-    const url = new URL(request.url);
-    const query = url.searchParams.get("q");
-
-    if (!query) {
-      return NextResponse.json(
-        { error: "Search query is required" },
-        { status: 400 },
-      );
-    }
-
     // Get the current session
     const { data } = await supabase.auth.getSession();
     const session = data?.session;
@@ -23,16 +23,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Search tracks, artists, albums, and playlists
-    const searchResults = await spotifyApi.search(
-      query,
-      "track,artist,album,playlist",
-      20,
-    );
+    // Search Spotify API
+    const response = await spotifyApi.search(query, types);
 
-    return NextResponse.json(searchResults);
-  } catch (error) {
-    console.error("Error searching Spotify:", error);
+    return NextResponse.json(response);
+  } catch (error: unknown) {
+    console.error("Spotify search error:", error);
     return NextResponse.json(
       { error: "Failed to search Spotify" },
       { status: 500 },

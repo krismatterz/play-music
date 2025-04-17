@@ -141,8 +141,8 @@ const SmartPlaylistView: React.FC = () => {
           fallbackPlaylist.map((track) => ({
             ...track,
             uri: "",
-            isPlaying: track.isPlaying || false,
-            explicit: track.explicit || false,
+            isPlaying: track.isPlaying ?? false,
+            explicit: track.explicit ?? false,
           })),
         );
         setLoading(false);
@@ -168,7 +168,7 @@ const SmartPlaylistView: React.FC = () => {
               title: item.track.name,
               artist: item.track.artists.map((a) => a.name).join(", "),
               cover:
-                item.track.album.images[0]?.url || "/placeholder-cover.png",
+                item.track.album.images[0]?.url ?? "/placeholder-cover.png",
               duration: formatDuration(item.track.duration_ms),
               isPlaying: false,
               explicit: item.track.explicit,
@@ -181,8 +181,8 @@ const SmartPlaylistView: React.FC = () => {
             fallbackPlaylist.map((track) => ({
               ...track,
               uri: "",
-              isPlaying: track.isPlaying || false,
-              explicit: track.explicit || false,
+              isPlaying: track.isPlaying ?? false,
+              explicit: track.explicit ?? false,
             })),
           );
         }
@@ -193,8 +193,8 @@ const SmartPlaylistView: React.FC = () => {
           fallbackPlaylist.map((track) => ({
             ...track,
             uri: "",
-            isPlaying: track.isPlaying || false,
-            explicit: track.explicit || false,
+            isPlaying: track.isPlaying ?? false,
+            explicit: track.explicit ?? false,
           })),
         );
       } finally {
@@ -209,7 +209,7 @@ const SmartPlaylistView: React.FC = () => {
   useEffect(() => {
     if (spotify.playbackState && spotify.playbackState.track_window) {
       const currentTrack = spotify.playbackState.track_window.current_track;
-      setCurrentlyPlayingUri(currentTrack?.uri || null);
+      setCurrentlyPlayingUri(currentTrack?.uri ?? null);
 
       // Update isPlaying status for all tracks
       setTracks((prevTracks) =>
@@ -224,14 +224,20 @@ const SmartPlaylistView: React.FC = () => {
 
   // Handle track click to play
   const handleTrackClick = async (track: DisplayTrack) => {
-    if (!spotify.isAuthenticated || !spotify.isPlayerReady) {
+    if (!spotify.isAuthenticated) {
       // Prompt to login if not authenticated
       await spotify.login();
       return;
     }
 
     if (track.uri) {
-      await spotify.play(track.uri);
+      if (spotify.isPremium) {
+        // For premium users, play directly in the app
+        await spotify.play(track.uri);
+      } else {
+        // For non-premium users, open in Spotify app
+        spotify.openSpotifyApp(track.uri);
+      }
     }
   };
 
@@ -253,7 +259,7 @@ const SmartPlaylistView: React.FC = () => {
                 : "Recommended Tracks"}
             </span>
           </div>
-          {spotify.isAuthenticated ? null : (
+          {!spotify.isAuthenticated && (
             <button
               onClick={() => spotify.login()}
               className="rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-500"
@@ -319,6 +325,31 @@ const SmartPlaylistView: React.FC = () => {
             {spotify.isAuthenticated ? "View All" : "Sign in to view more"}
           </button>
         </div>
+
+        {spotify.isAuthenticated && !spotify.isPremium && (
+          <div className="mt-2 rounded-lg bg-amber-900/30 p-2 text-xs">
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-amber-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>
+                Spotify Premium required for in-app playback. Tracks will open
+                in Spotify app.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

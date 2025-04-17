@@ -168,20 +168,38 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     }
 
     if (result.type === "track") {
-      // Play the track
-      spotify.play(result.uri);
+      // Play the track - handle premium vs non-premium
+      if (spotify.isPremium) {
+        // For premium users, play directly in the app
+        spotify.play(result.uri);
+      } else {
+        // For non-premium users, open in Spotify app
+        spotify.openSpotifyApp(result.uri);
+      }
       onClose();
     } else if (result.type === "artist") {
-      // Navigate to artist page
-      router.push(`/artist/${result.id}`);
+      // Navigate to artist page or open in Spotify
+      if (spotify.isPremium) {
+        router.push(`/artist/${result.id}`);
+      } else {
+        spotify.openSpotifyApp(result.uri);
+      }
       onClose();
     } else if (result.type === "album") {
-      // Navigate to album page
-      router.push(`/album/${result.id}`);
+      // Navigate to album page or open in Spotify
+      if (spotify.isPremium) {
+        router.push(`/album/${result.id}`);
+      } else {
+        spotify.openSpotifyApp(result.uri);
+      }
       onClose();
     } else if (result.type === "playlist") {
-      // Navigate to playlist page
-      router.push(`/playlist/${result.id}`);
+      // Navigate to playlist page or open in Spotify
+      if (spotify.isPremium) {
+        router.push(`/playlist/${result.id}`);
+      } else {
+        spotify.openSpotifyApp(result.uri);
+      }
       onClose();
     }
   };
