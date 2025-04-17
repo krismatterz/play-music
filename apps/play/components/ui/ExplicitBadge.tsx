@@ -2,7 +2,7 @@ import React from "react";
 
 const ExplicitBadge: React.FC = () => (
   <span
-    className="ml-2 inline-flex items-center justify-center rounded border border-neutral-600 bg-neutral-800 px-1.5 py-0.5 text-xs font-bold text-white"
+    className="ml-1 inline-flex items-center justify-center rounded border border-slate-800 bg-gradient-to-r from-slate-800 to-purple-700/50 px-1 py-0 align-middle text-[10px] leading-none font-bold text-white/80"
     title="Explicit"
   >
     E
