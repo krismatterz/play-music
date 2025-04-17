@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@play/ui";
+import { Button } from "../../../components/ui/button";
 import { UserButton, useUser } from "@clerk/nextjs";
 
 export default function DashboardPage() {
@@ -38,7 +38,7 @@ export default function DashboardPage() {
       </p>
 
       <div className="flex flex-wrap justify-center gap-4">
-        <Button variant="primary" size="lg">
+        <Button variant="default" size="lg">
           Upload Music
         </Button>
         <Button variant="outline" size="lg">
