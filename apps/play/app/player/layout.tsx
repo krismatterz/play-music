@@ -23,30 +23,24 @@ export default function PlayerLayout({
               Menu
             </h2>
             <div className="space-y-1">
-              <a
-                href="#"
-                className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
-              >
-                Home
-              </a>
               <Link
                 href="/player"
                 className="block rounded bg-white/10 px-3 py-2 font-medium text-white"
               >
                 Player
               </Link>
-              <a
-                href="#"
+              <Link
+                href="/search"
                 className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
               >
                 Search
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                href="/library"
                 className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
               >
                 Your Library
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -55,12 +49,6 @@ export default function PlayerLayout({
               Playlists
             </h2>
             <div className="space-y-1">
-              <a
-                href="#"
-                className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
-              >
-                Liked Songs
-              </a>
               <a
                 href="#"
                 className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
