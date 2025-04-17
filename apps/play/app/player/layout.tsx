@@ -3,12 +3,16 @@
 import React from "react";
 import NowPlaying from "../../components/ui/NowPlaying";
 import Link from "next/link";
+import SearchModal from "../../components/search/SearchModal";
+import { useSearchModal } from "../../hooks/useSearchModal";
 
 export default function PlayerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { isSearchOpen, openSearch, closeSearch } = useSearchModal();
+
   return (
     <div className="flex h-screen bg-black text-white">
       {/* Left sidebar for navigation */}
@@ -31,9 +35,12 @@ export default function PlayerLayout({
               </Link>
               <Link
                 href="/search"
-                className="block rounded px-3 py-2 font-medium text-white hover:bg-white/10"
+                className="flex w-full items-center justify-between rounded px-3 py-2 font-medium text-white hover:bg-white/10"
               >
-                Search
+                <span>Search</span>
+                <kbd className="hidden rounded border border-white/20 bg-white/10 px-1.5 py-0.5 text-xs text-neutral-400 sm:inline-block">
+                  ⌘K
+                </kbd>
               </Link>
               <Link
                 href="/library"
@@ -84,6 +91,9 @@ export default function PlayerLayout({
           </div>
         </div>
       </div>
+
+      {/* Search Modal */}
+      <SearchModal isOpen={isSearchOpen} onClose={closeSearch} />
     </div>
   );
 }
