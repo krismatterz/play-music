@@ -3,6 +3,7 @@ import "./globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import PlayerProviderWrapper from "../components/PlayerProviderWrapper";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   title: "Play",
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <PlayerProviderWrapper>{children}</PlayerProviderWrapper>
+        <Analytics />
       </body>
     </html>
   );
