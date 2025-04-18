@@ -138,17 +138,15 @@ export default function LandingPage() {
   }
 
   // Page title from Figma
-  const pageTitle = "Pre-Add Song";
 
   return (
-    // Figma exact match with responsive container
     <div className="min-h-screen bg-zinc-950">
-      {/* Admin bar - restored */}
+      {/* Navbar */}
       <div className="bg-black/80 p-4">
         <div className="container mx-auto flex items-center justify-between">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/marketing">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Marketing
             </Link>
           </Button>
           <div className="flex items-center gap-2">
@@ -186,104 +184,105 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Page title */}
-      <div className="pt-8 pl-8 text-lg font-medium text-white"></div>
-
-      {/* Main content container - responsive with aspect ratio control */}
-      <div className="flex items-center justify-center px-4 py-8">
-        {/* White card container with responsive width */}
-        <div className="w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-xl">
-          {/* Main content area */}
-          <div className="relative min-h-[900px] w-full">
-            {/* Blurred background cover */}
-            <div className="absolute inset-0">
-              <Image
-                src={landingPage.cover}
-                alt="Background"
-                fill
-                className="scale-110 object-cover blur-xl"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/30 to-black/40"></div>
-            </div>
-
-            {/* Content layout - maintains aspect ratio */}
-            <div className="relative flex aspect-[1.6/1] w-full flex-col">
-              {/* Main album artwork centered but moved up */}
-              <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-                <div className="relative h-[350px] w-[350px] overflow-hidden rounded-lg shadow-xl sm:h-[400px] sm:w-[400px]">
-                  <Image
-                    src={landingPage.cover}
-                    alt={landingPage.title}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
+      <div className="flex items-center justify-center">
+        {/* Main content container - responsive with aspect ratio control */}
+        <div className="flex min-h-[1000px] min-w-[1310px] items-center rounded-xl bg-white px-10 py-10">
+          {/* White card container with responsive width */}
+          <div className="w-full max-w-6xl overflow-hidden rounded-3xl shadow-xl">
+            {/* Main content area */}
+            <div className="relative min-h-[900px] min-w-[900px]">
+              {/* Blurred background cover */}
+              <div className="absolute inset-0">
+                <Image
+                  src={landingPage.cover}
+                  alt="Background"
+                  fill
+                  className="scale-110 object-cover blur-xl"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/30 to-black/40"></div>
               </div>
 
-              {/* Countdown timer - right side vertical stack, positioned closer to cover */}
-              <div className="absolute top-[40%] right-[15%] flex -translate-y-1/2 transform flex-col gap-4">
-                {Object.entries(timeLeft).map(([unit, value], index) => (
-                  <div
-                    key={unit}
-                    className="flex h-20 w-20 flex-col items-center justify-center rounded-lg bg-zinc-900/80 shadow-lg"
-                  >
-                    <div className="text-2xl font-bold text-white">{value}</div>
-                    <div className="text-xs text-white/70">
-                      {unit === "days"
-                        ? "Days"
-                        : unit === "hours"
-                          ? "Hours"
-                          : unit === "minutes"
-                            ? "Minutes"
-                            : "Seconds"}
-                    </div>
+              {/* Content layout - maintains aspect ratio */}
+              <div className="relative flex aspect-[1.6/1] w-full flex-col">
+                {/* Main album artwork centered but moved up */}
+                <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+                  <div className="relative h-[350px] w-[350px] overflow-hidden rounded-lg shadow-xl sm:h-[400px] sm:w-[400px]">
+                    <Image
+                      src={landingPage.cover}
+                      alt={landingPage.title}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
                   </div>
-                ))}
-              </div>
+                </div>
 
-              {/* Title positioning - moved down to avoid clashing with art */}
-              <div className="absolute top-[70%] left-1/2 w-full -translate-x-1/2 transform text-center">
-                <h1 className="text-3xl font-bold text-white">
-                  {landingPage.artist} - {landingPage.title}
-                </h1>
-              </div>
-
-              {/* Streaming links - positioned at the bottom with improved spacing */}
-              <div className="absolute top-144 flex w-full justify-center">
-                <div className="grid w-[80%] max-w-xl grid-cols-1 flex-col items-center gap-6">
-                  {landingPage.links.map((link) => (
+                {/* Countdown timer - right side vertical stack, positioned closer to cover */}
+                <div className="absolute top-[40%] right-[25%] flex -translate-y-1/2 transform flex-col gap-4">
+                  {Object.entries(timeLeft).map(([unit, value]) => (
                     <div
-                      key={link.platform}
-                      className="flex w-full items-center justify-center gap-12"
+                      key={unit}
+                      className="flex h-18 w-18 flex-col items-center justify-center rounded-lg bg-zinc-900/80 shadow-lg"
                     >
-                      {/* Platform logo with label */}
-                      <div className="flex flex-col items-center">
-                        {link.isAppleMusic}
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="relative h-6 w-28">
-                            <Image
-                              src={link.logo}
-                              alt={link.platform}
-                              fill
-                              className="object-contain object-center"
-                            />
-                          </div>
-                        </div>
+                      <div className="text-2xl font-bold text-white">
+                        {value}
                       </div>
-
-                      {/* Action button */}
-                      <div className="relative h-[30px] w-[70px]">
-                        <Image
-                          src={link.actionButton}
-                          alt={`${link.platform} action`}
-                          fill
-                          className="object-contain object-right"
-                        />
+                      <div className="text-xs text-white/70">
+                        {unit === "days"
+                          ? "Days"
+                          : unit === "hours"
+                            ? "Hours"
+                            : unit === "minutes"
+                              ? "Minutes"
+                              : "Seconds"}
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Title positioning - moved down to avoid clashing with art */}
+                <div className="absolute top-[70%] left-1/2 w-full -translate-x-1/2 transform text-center">
+                  <h1 className="text-3xl font-bold text-white">
+                    {landingPage.artist} - {landingPage.title}
+                  </h1>
+                </div>
+
+                {/* Streaming links - positioned at the bottom with improved spacing */}
+                <div className="absolute top-144 flex w-full justify-center">
+                  <div className="grid w-[80%] max-w-xl grid-cols-1 flex-col items-center gap-6">
+                    {landingPage.links.map((link) => (
+                      <div
+                        key={link.platform}
+                        className="flex w-full items-center justify-center gap-12"
+                      >
+                        {/* Platform logo with label */}
+                        <div className="flex flex-col items-center">
+                          {link.isAppleMusic}
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="relative h-6 w-28">
+                              <Image
+                                src={link.logo}
+                                alt={link.platform}
+                                fill
+                                className="object-contain object-center"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action button */}
+                        <div className="relative h-[30px] w-[70px]">
+                          <Image
+                            src={link.actionButton}
+                            alt={`${link.platform} action`}
+                            fill
+                            className="object-contain object-right"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
