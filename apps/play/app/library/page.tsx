@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useSpotify } from "../../hooks/useSpotify";
 import Image from "next/image";
 import Link from "next/link";
-import { formatDuration } from "../../utils/formatDuration";
 
 // Types
 interface PlaylistItem {
@@ -20,12 +19,18 @@ interface PlaylistItem {
   };
 }
 
+interface PlaylistResponse {
+  items: PlaylistItem[];
+}
+
 export default function LibraryPage() {
   const spotify = useSpotify();
   const [playlists, setPlaylists] = useState<PlaylistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchPlaylists() {
       if (!spotify.isAuthenticated) {
         setIsLoading(false);
@@ -39,22 +44,28 @@ export default function LibraryPage() {
           throw new Error(`Error: ${response.status}`);
         }
 
-        const data = await response.json();
-        if (data && data.items) {
+        const data = (await response.json()) as PlaylistResponse;
+        if (isMounted && data?.items) {
           setPlaylists(data.items);
         }
       } catch (error) {
         console.error("Error fetching playlists:", error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
-    fetchPlaylists();
+    void fetchPlaylists();
+
+    return () => {
+      isMounted = false;
+    };
   }, [spotify.isAuthenticated]);
 
   const handleConnectClick = () => {
-    spotify.login();
+    void spotify.login();
   };
 
   if (!spotify.isAuthenticated && !isLoading) {
@@ -113,7 +124,7 @@ export default function LibraryPage() {
                     }
                   >
                     <div className="relative mb-4 aspect-square w-full overflow-hidden rounded-md bg-zinc-800/80 shadow-lg">
-                      {playlist.images && playlist.images[0] ? (
+                      {playlist.images?.[0] ? (
                         <Image
                           src={
                             playlist.images[0].url ||
@@ -148,11 +159,11 @@ export default function LibraryPage() {
                       </h3>
                       <p className="line-clamp-2 text-sm text-zinc-400">
                         {playlist.description ||
-                          `By ${playlist.owner?.display_name || "You"}`}
+                          `By ${playlist.owner?.display_name ?? "You"}`}
                       </p>
                     </div>
                     <div className="mt-2 text-xs text-zinc-500">
-                      {playlist.tracks?.total || 0} tracks
+                      {playlist.tracks?.total ?? 0} tracks
                     </div>
                   </div>
                 ))}
@@ -160,7 +171,7 @@ export default function LibraryPage() {
             ) : (
               <div className="rounded-lg bg-zinc-800/40 p-8 text-center">
                 <p className="mb-4 text-zinc-400">
-                  You don't have any playlists yet.
+                  You don&apos;t have any playlists yet.
                 </p>
                 <Link
                   href="/search"

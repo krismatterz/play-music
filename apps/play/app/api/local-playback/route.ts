@@ -4,19 +4,29 @@ import { PostgrestError } from "@supabase/supabase-js";
 
 // Define expected structure for track details
 interface TrackDetails {
-  name?: string;
-  artist?: string;
-  cover?: string;
-  url?: string;
-  duration?: string;
-  explicit?: boolean;
+  name: string | null;
+  artist: string | null;
+  cover: string | null;
+  url: string | null;
+  duration: string | null;
+  explicit: boolean | null;
 }
 
 // Define expected structure for playlist tracks from DB
 interface PlaylistTrackFromDB {
   track_id: string;
-  track_details: TrackDetails | null | unknown; // Allow for potential null or unknown structure
+  track_details: TrackDetails;
   position: number;
+}
+
+interface FormattedTrack {
+  id: string;
+  title: string;
+  artist: string;
+  cover: string;
+  url: string;
+  duration: string;
+  explicit: boolean;
 }
 
 export async function GET() {
@@ -41,7 +51,7 @@ export async function GET() {
       return NextResponse.json({ tracks: [] }, { status });
     }
 
-    const playlistId = playlistData.id;
+    const playlistId = playlistData.id as string;
 
     // Fetch tracks for that playlist
     const { data: tracksData, error: tracksError } = await supabase
@@ -65,23 +75,18 @@ export async function GET() {
     }
 
     // Format tracks safely
-    const formattedTracks = tracksData.map((track: PlaylistTrackFromDB) => {
-      // Type guard for track_details
-      const details = track.track_details as TrackDetails | null;
-
-      return {
-        id: track.track_id,
-        title: details?.name ?? "Unknown Title",
-        artist: details?.artist ?? "Unknown Artist",
-        cover: details?.cover ?? "/placeholder-cover.png",
-        url: details?.url ?? "",
-        duration: details?.duration ?? "0:00",
-        explicit: details?.explicit ?? false,
-      };
-    });
+    const formattedTracks: FormattedTrack[] = tracksData.map((track) => ({
+      id: track.track_id,
+      title: track.track_details?.name ?? "Unknown Title",
+      artist: track.track_details?.artist ?? "Unknown Artist",
+      cover: track.track_details?.cover ?? "/placeholder-cover.png",
+      url: track.track_details?.url ?? "",
+      duration: track.track_details?.duration ?? "0:00",
+      explicit: track.track_details?.explicit ?? false,
+    }));
 
     return NextResponse.json({ tracks: formattedTracks });
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     console.error("Unexpected error in /api/local-playback:", errorMessage);

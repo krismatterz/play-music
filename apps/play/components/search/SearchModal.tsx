@@ -6,6 +6,48 @@ import { useSpotify } from "../../hooks/useSpotify";
 import { useRouter } from "next/navigation";
 import { formatDuration } from "../../utils/formatDuration";
 
+interface SpotifyImage {
+  url: string;
+}
+
+interface SpotifyArtist {
+  id: string;
+  name: string;
+  uri: string;
+  images: SpotifyImage[];
+}
+
+interface SpotifyAlbum {
+  id: string;
+  name: string;
+  uri: string;
+  images: SpotifyImage[];
+  artists: SpotifyArtist[];
+}
+
+interface SpotifyTrack {
+  id: string;
+  name: string;
+  uri: string;
+  album: SpotifyAlbum;
+  artists: SpotifyArtist[];
+  duration_ms: number;
+}
+
+interface SpotifyPlaylist {
+  id: string;
+  name: string;
+  uri: string;
+  images: SpotifyImage[];
+}
+
+interface SpotifySearchResponse {
+  tracks?: { items: SpotifyTrack[] };
+  artists?: { items: SpotifyArtist[] };
+  albums?: { items: SpotifyAlbum[] };
+  playlists?: { items: SpotifyPlaylist[] };
+}
+
 type SearchResult = {
   id: string;
   uri: string;
@@ -54,20 +96,20 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         const response = await fetch(
           `/api/spotify/search?q=${encodeURIComponent(query)}`,
         );
-        const data = await response.json();
+        const data = (await response.json()) as SpotifySearchResponse;
 
         const formattedResults: SearchResult[] = [];
 
         // Add tracks
         if (data.tracks?.items) {
           formattedResults.push(
-            ...data.tracks.items.map((track: any) => ({
+            ...data.tracks.items.map((track) => ({
               id: track.id,
               uri: track.uri,
               name: track.name,
-              type: "track",
-              images: track.album.images.map((img: any) => img.url),
-              artists: track.artists.map((artist: any) => artist.name),
+              type: "track" as const,
+              images: track.album.images.map((img) => img.url),
+              artists: track.artists.map((artist) => artist.name),
               album: track.album.name,
               duration_ms: track.duration_ms,
             })),
@@ -77,12 +119,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         // Add artists
         if (data.artists?.items) {
           formattedResults.push(
-            ...data.artists.items.map((artist: any) => ({
+            ...data.artists.items.map((artist) => ({
               id: artist.id,
               uri: artist.uri,
               name: artist.name,
-              type: "artist",
-              images: artist.images.map((img: any) => img.url),
+              type: "artist" as const,
+              images: artist.images.map((img) => img.url),
             })),
           );
         }
@@ -90,13 +132,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         // Add albums
         if (data.albums?.items) {
           formattedResults.push(
-            ...data.albums.items.map((album: any) => ({
+            ...data.albums.items.map((album) => ({
               id: album.id,
               uri: album.uri,
               name: album.name,
-              type: "album",
-              images: album.images.map((img: any) => img.url),
-              artists: album.artists.map((artist: any) => artist.name),
+              type: "album" as const,
+              images: album.images.map((img) => img.url),
+              artists: album.artists.map((artist) => artist.name),
             })),
           );
         }
@@ -104,12 +146,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         // Add playlists
         if (data.playlists?.items) {
           formattedResults.push(
-            ...data.playlists.items.map((playlist: any) => ({
+            ...data.playlists.items.map((playlist) => ({
               id: playlist.id,
               uri: playlist.uri,
               name: playlist.name,
-              type: "playlist",
-              images: playlist.images.map((img: any) => img.url),
+              type: "playlist" as const,
+              images: playlist.images.map((img) => img.url),
             })),
           );
         }
@@ -124,7 +166,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
     const debounceTimer = setTimeout(() => {
       if (query.trim()) {
-        searchSpotify();
+        void searchSpotify();
       }
     }, 300);
 
@@ -163,7 +205,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   // Handle result selection
   const handleSelectResult = (result: SearchResult) => {
     if (!spotify.isAuthenticated) {
-      spotify.login();
+      void spotify.login();
       return;
     }
 
@@ -171,10 +213,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       // Play the track - handle premium vs non-premium
       if (spotify.isPremium) {
         // For premium users, play directly in the app
-        spotify.play(result.uri);
+        void spotify.play(result.uri);
       } else {
         // For non-premium users, open in Spotify app
-        spotify.openSpotifyApp(result.uri);
+        void spotify.openSpotifyApp(result.uri);
       }
       onClose();
     } else if (result.type === "artist") {
@@ -182,7 +224,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       if (spotify.isPremium) {
         router.push(`/artist/${result.id}`);
       } else {
-        spotify.openSpotifyApp(result.uri);
+        void spotify.openSpotifyApp(result.uri);
       }
       onClose();
     } else if (result.type === "album") {
@@ -190,7 +232,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       if (spotify.isPremium) {
         router.push(`/album/${result.id}`);
       } else {
-        spotify.openSpotifyApp(result.uri);
+        void spotify.openSpotifyApp(result.uri);
       }
       onClose();
     } else if (result.type === "playlist") {
@@ -198,7 +240,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       if (spotify.isPremium) {
         router.push(`/playlist/${result.id}`);
       } else {
-        spotify.openSpotifyApp(result.uri);
+        void spotify.openSpotifyApp(result.uri);
       }
       onClose();
     }

@@ -3,6 +3,7 @@
   "version": "0.2.4",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.0.26",
   "scripts": {
     "build": "next build --turbopack",
     "check": "next lint && tsc --noEmit",

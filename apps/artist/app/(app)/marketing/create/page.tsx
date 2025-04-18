@@ -34,6 +34,8 @@ const formSchema = z.object({
   // We'll validate links separately since it's a dynamic array
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 // Background options for the landing page
 const backgroundOptions = [
   { label: "Amber", value: "from-amber-900 to-black" },
@@ -62,7 +64,7 @@ export default function CreateLandingPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
   // Initialize the form
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
@@ -73,7 +75,7 @@ export default function CreateLandingPage() {
   });
 
   // Handler for submitting the form
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: FormValues) {
     // In a real application, you would save this to a database
     console.log({
       ...values,
@@ -97,10 +99,10 @@ export default function CreateLandingPage() {
       setLinks([
         ...links,
         {
-          platform: platform.name,
+          platform: platform?.name ?? "",
           url: "",
-          color: platform.color,
-          action: platform.action,
+          color: platform?.color ?? "#000000",
+          action: platform?.action ?? "Pre-save",
         },
       ]);
     }

@@ -94,9 +94,9 @@ export function loadSpotifyScript(): Promise<void> {
     script.async = true;
 
     script.onload = () => resolve();
-    script.onerror = (error: Error) =>
+    script.onerror = (event: Event | string) =>
       reject(
-        new Error(`Spotify Web Playback SDK script failed to load: ${error}`),
+        new Error(`Spotify Web Playback SDK script failed to load: ${event}`),
       );
 
     document.body.appendChild(script);

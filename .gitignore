@@ -9,7 +9,9 @@ bun
 .bun
 .bun.lock
 bun.lockb
+.bun.lockb
 bun.lock
+.turbo
 
 # testing
 /coverage

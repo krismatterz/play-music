@@ -3,6 +3,7 @@
   "version": "0.2.4",
   "private": true,
   "type": "module",
+  "packageManager": "bun@1.0.26",
   "scripts": {
     "build": "next build --turbopack",
     "check": "next lint && tsc --noEmit",
@@ -23,6 +24,7 @@
     "next": "^15.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "supabase": "workspace:*",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2"
   },
