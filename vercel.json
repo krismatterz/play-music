@@ -1,0 +1,44 @@
+{
+  "buildCommand": "bun run build",
+  "installCommand": "bun install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "builds": [
+    {
+      "src": "apps/play/next.config.js",
+      "use": "@vercel/next",
+      "config": {
+        "outputDirectory": ".next"
+      }
+    },
+    {
+      "src": "apps/artist/next.config.js",
+      "use": "@vercel/next",
+      "config": {
+        "outputDirectory": ".next"
+      }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "artist.play-music.app"
+        }
+      ],
+      "destination": "/apps/artist/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "play-music.app"
+        }
+      ],
+      "destination": "/apps/play/:path*"
+    }
+  ]
+}
