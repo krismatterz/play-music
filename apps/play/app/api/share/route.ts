@@ -2,11 +2,11 @@ import {
   createServerClient as createSupabaseServerClient,
   type CookieOptions,
 } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { type Track, type Artist } from "supabase";
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { cookieManager } from "./cookie-manager";
 
 const supabaseClient = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,47 +35,6 @@ interface StoredTrackData {
   spotify_id: string;
   duration_ms: number;
 }
-
-export class CookieManager {
-  async get(name: string): Promise<string | undefined> {
-    try {
-      const cookieStore = await cookies();
-      const cookie = cookieStore.get(name);
-      return cookie?.value;
-    } catch (error) {
-      console.error("Error getting cookie:", error);
-      return undefined;
-    }
-  }
-
-  async set(
-    name: string,
-    value: string,
-    options: CookieOptions,
-  ): Promise<void> {
-    try {
-      const cookieStore = await cookies();
-      cookieStore.set(name, value, options);
-    } catch (error) {
-      console.error("Error setting cookie:", error);
-    }
-  }
-
-  async remove(name: string, options?: CookieOptions): Promise<void> {
-    try {
-      const cookieStore = await cookies();
-      if (options) {
-        cookieStore.set(name, "", { ...options, maxAge: 0 });
-      } else {
-        cookieStore.delete(name);
-      }
-    } catch (error) {
-      console.error("Error removing cookie:", error);
-    }
-  }
-}
-
-export const cookieManager = new CookieManager();
 
 export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -198,8 +157,8 @@ export async function GET(request: Request) {
     .single();
 
   const { data, error } = response as unknown as {
-    data: StoredTrackData;
-    error: Error;
+    data: { track_data: StoredTrackData } | null;
+    error: Error | null;
   };
 
   if (error) {
@@ -207,6 +166,10 @@ export async function GET(request: Request) {
       { error: "Failed to fetch track", details: error.message },
       { status: 500 },
     );
+  }
+
+  if (!data) {
+    return NextResponse.json({ error: "Track not found" }, { status: 404 });
   }
 
   return NextResponse.json(data);
