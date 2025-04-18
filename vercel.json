@@ -1,7 +1,7 @@
 {
-  "buildCommand": null,
-  "installCommand": null,
-  "framework": null,
+  "buildCommand": "cd apps/play && bun install && bun run build",
+  "installCommand": "bun install",
+  "framework": "nextjs",
   "builds": [
     {
       "src": "apps/play/next.config.js",
