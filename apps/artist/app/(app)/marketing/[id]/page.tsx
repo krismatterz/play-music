@@ -15,37 +15,56 @@ const landingPages = {
     artist: "Eladio Carrión",
     cover: "/Eladio - DON KBRN.png",
     releaseDate: "2025-04-19T00:00:00Z",
-    backgroundColor: "from-amber-900 to-black",
     links: [
-      { platform: "Spotify", url: "#", color: "#1DB954", action: "Pre-save" },
+      {
+        platform: "Spotify",
+        url: "#",
+        logo: "/platforms/Spotify_Primary_Logo_RGB_Green.png",
+        actionButton: "/platforms/Pre-save Button.svg",
+        isAppleMusic: false,
+      },
       {
         platform: "Apple Music",
         url: "#",
-        color: "#FA243C",
-        action: "Pre-add",
+        logo: "/platforms/Apple_Music_Icon_RGB_sm_073120.svg",
+        actionButton: "/platforms/Apple Music Pre-add Button.svg",
+        isAppleMusic: true,
       },
       {
         platform: "Amazon Music",
         url: "#",
-        color: "#00A8E1",
-        action: "Pre-save",
+        logo: "/platforms/Amazon_Music_Logo_Horizontal_RGB_White+Music_Cyan_MASTER.svg",
+        actionButton: "/platforms/Amazon Pre-save Button.svg",
+        isAppleMusic: false,
       },
-      { platform: "Deezer", url: "#", color: "#00C7F2", action: "Pre-save" },
+      {
+        platform: "Deezer",
+        url: "#",
+        logo: "/platforms/Deezer_Logo_RVB_White.svg",
+        actionButton: "/platforms/Deezer Pre-save Button.svg",
+        isAppleMusic: false,
+      },
     ],
   },
   "sauce-boyz-3": {
     title: "Sauce Boyz 3",
     artist: "Eladio Carrión",
-    cover: "/SauceBoyz3.png",
+    cover: "/Eladio_Sauce_Boyz_2_Cover.png",
     releaseDate: "2025-12-01T00:00:00Z",
-    backgroundColor: "from-blue-900 to-black",
     links: [
-      { platform: "Spotify", url: "#", color: "#1DB954", action: "Pre-save" },
+      {
+        platform: "Spotify",
+        url: "#",
+        logo: "/platforms/Spotify_Primary_Logo_RGB_Green.png",
+        actionButton: "/platforms/Pre-save Button.svg",
+        isAppleMusic: false,
+      },
       {
         platform: "Apple Music",
         url: "#",
-        color: "#FA243C",
-        action: "Pre-add",
+        logo: "/platforms/Apple_Music_Icon_RGB_sm_073120.svg",
+        actionButton: "/platforms/Apple Music Pre-add Button.svg",
+        isAppleMusic: true,
       },
     ],
   },
@@ -56,6 +75,9 @@ export default function LandingPage() {
   const id = params.id as string;
   const landingPage = landingPages[id as keyof typeof landingPages];
 
+  // State for copy button
+  const [copied, setCopied] = useState(false);
+
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -63,8 +85,7 @@ export default function LandingPage() {
     seconds: 0,
   });
 
-  // Moved copied state and handler to top level
-  const [copied, setCopied] = useState(false);
+  // Handle copying URL
   const handleCopy = async () => {
     await navigator.clipboard.writeText(
       "https://open.spotify.com/album/77WXheyyYBkqqz6Q19l37a",
@@ -116,11 +137,13 @@ export default function LandingPage() {
     );
   }
 
+  // Page title from Figma
+  const pageTitle = "Pre-Add Song";
+
   return (
-    <div
-      className={`flex min-h-screen flex-col bg-gradient-to-b ${landingPage.backgroundColor} text-white`}
-    >
-      {/* Admin bar - only visible when accessed within the app */}
+    // Figma exact match with responsive container
+    <div className="min-h-screen bg-zinc-950">
+      {/* Admin bar - restored */}
       <div className="bg-black/80 p-4">
         <div className="container mx-auto flex items-center justify-between">
           <Button variant="ghost" size="sm" asChild>
@@ -132,7 +155,9 @@ export default function LandingPage() {
             <Button
               variant="outline"
               size="sm"
-              className={`relative bg-white text-black transition-all duration-300 ${copied ? "ring-2 ring-green-400" : ""}`}
+              className={`relative bg-white text-black transition-all duration-300 ${
+                copied ? "ring-2 ring-green-400" : ""
+              }`}
               type="button"
               onClick={handleCopy}
               style={{ minWidth: 110 }}
@@ -150,7 +175,6 @@ export default function LandingPage() {
                 )}
               </span>
             </Button>
-            {/* TODO: Add edit landing page button */}
             <Button
               size="sm"
               disabled
@@ -162,69 +186,105 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="container mx-auto flex flex-1 flex-col items-center justify-center px-4 py-12">
-        <div className="w-full max-w-4xl">
-          <div className="flex flex-col items-center md:flex-row md:items-start md:gap-8">
-            {/* Album art */}
-            <div className="relative mb-8 h-64 w-64 flex-shrink-0 overflow-hidden rounded-lg shadow-2xl md:mb-0 md:h-80 md:w-80">
+      {/* Page title */}
+      <div className="pt-8 pl-8 text-lg font-medium text-white"></div>
+
+      {/* Main content container - responsive with aspect ratio control */}
+      <div className="flex items-center justify-center px-4 py-8">
+        {/* White card container with responsive width */}
+        <div className="w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-xl">
+          {/* Main content area */}
+          <div className="relative min-h-[900px] w-full">
+            {/* Blurred background cover */}
+            <div className="absolute inset-0">
               <Image
                 src={landingPage.cover}
-                alt={`${landingPage.title} - ${landingPage.artist}`}
+                alt="Background"
                 fill
-                className="object-cover"
-                onError={(e) => {
-                  e.currentTarget.src =
-                    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-                  e.currentTarget.style.backgroundColor = "#333";
-                }}
+                className="scale-110 object-cover blur-xl"
+                priority
               />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/30 to-black/40"></div>
             </div>
 
-            {/* Info and links */}
-            <div className="flex-grow text-center md:text-left">
-              <h2 className="mb-1 text-3xl font-bold">{landingPage.title}</h2>
-              <h3 className="mb-8 text-xl text-white/80">
-                {landingPage.artist}
-              </h3>
-
-              {/* Countdown timer */}
-              <div className="mb-8 flex justify-center gap-4 md:justify-start">
-                <div className="flex flex-col items-center rounded-lg bg-black/40 p-3 shadow-lg">
-                  <span className="text-2xl font-bold">{timeLeft.days}</span>
-                  <span className="text-xs text-white/70">Days</span>
-                </div>
-                <div className="flex flex-col items-center rounded-lg bg-black/40 p-3 shadow-lg">
-                  <span className="text-2xl font-bold">{timeLeft.hours}</span>
-                  <span className="text-xs text-white/70">Hours</span>
-                </div>
-                <div className="flex flex-col items-center rounded-lg bg-black/40 p-3 shadow-lg">
-                  <span className="text-2xl font-bold">{timeLeft.minutes}</span>
-                  <span className="text-xs text-white/70">Minutes</span>
-                </div>
-                <div className="flex flex-col items-center rounded-lg bg-black/40 p-3 shadow-lg">
-                  <span className="text-2xl font-bold">{timeLeft.seconds}</span>
-                  <span className="text-xs text-white/70">Seconds</span>
+            {/* Content layout - maintains aspect ratio */}
+            <div className="relative flex aspect-[1.6/1] w-full flex-col">
+              {/* Main album artwork centered but moved up */}
+              <div className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+                <div className="relative h-[350px] w-[350px] overflow-hidden rounded-lg shadow-xl sm:h-[400px] sm:w-[400px]">
+                  <Image
+                    src={landingPage.cover}
+                    alt={landingPage.title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
                 </div>
               </div>
 
-              {/* Streaming links */}
-              <div className="space-y-3">
-                {landingPage.links.map((link) => (
-                  <Button
-                    key={link.platform}
-                    className={`w-full justify-between bg-[${link.color}] text-white hover:bg-[${link.color}]/90`}
-                    style={{ backgroundColor: link.color }}
+              {/* Countdown timer - right side vertical stack, positioned closer to cover */}
+              <div className="absolute top-[40%] right-[15%] flex -translate-y-1/2 transform flex-col gap-4">
+                {Object.entries(timeLeft).map(([unit, value], index) => (
+                  <div
+                    key={unit}
+                    className="flex h-20 w-20 flex-col items-center justify-center rounded-lg bg-zinc-900/80 shadow-lg"
                   >
-                    <span className="flex items-center">
-                      <span className="mr-2 h-5 w-5 rounded-full bg-white/20"></span>
-                      {link.platform}
-                    </span>
-                    <span className="rounded-full bg-white/20 px-2 py-1 text-xs">
-                      {link.action}
-                    </span>
-                  </Button>
+                    <div className="text-2xl font-bold text-white">{value}</div>
+                    <div className="text-xs text-white/70">
+                      {unit === "days"
+                        ? "Days"
+                        : unit === "hours"
+                          ? "Hours"
+                          : unit === "minutes"
+                            ? "Minutes"
+                            : "Seconds"}
+                    </div>
+                  </div>
                 ))}
+              </div>
+
+              {/* Title positioning - moved down to avoid clashing with art */}
+              <div className="absolute top-[70%] left-1/2 w-full -translate-x-1/2 transform text-center">
+                <h1 className="text-3xl font-bold text-white">
+                  {landingPage.artist} - {landingPage.title}
+                </h1>
+              </div>
+
+              {/* Streaming links - positioned at the bottom with improved spacing */}
+              <div className="absolute top-144 flex w-full justify-center">
+                <div className="grid w-[80%] max-w-xl grid-cols-1 flex-col items-center gap-6">
+                  {landingPage.links.map((link) => (
+                    <div
+                      key={link.platform}
+                      className="flex w-full items-center justify-center gap-12"
+                    >
+                      {/* Platform logo with label */}
+                      <div className="flex flex-col items-center">
+                        {link.isAppleMusic}
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="relative h-6 w-28">
+                            <Image
+                              src={link.logo}
+                              alt={link.platform}
+                              fill
+                              className="object-contain object-center"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action button */}
+                      <div className="relative h-[30px] w-[70px]">
+                        <Image
+                          src={link.actionButton}
+                          alt={`${link.platform} action`}
+                          fill
+                          className="object-contain object-right"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

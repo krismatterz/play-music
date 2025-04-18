@@ -11,6 +11,23 @@ export default function MarketingPage() {
     backgroundImage: `radial-gradient(ellipse at top, hsl(220 10% 15%) 0%, hsl(220 10% 5%) 70%)`,
   };
 
+  // Platform logos mapping
+  const platformLogos = {
+    Spotify: "/platforms/Spotify_Primary_Logo_RGB_Green.png",
+    "Apple Music": "/platforms/Apple_Music_Icon_RGB_sm_073120.svg",
+    Deezer: "/platforms/Deezer_Logo_RVB_White.svg",
+    "Amazon Music":
+      "/platforms/Amazon_Music_Logo_Horizontal_RGB_White+Music_Cyan_MASTER.svg",
+  };
+
+  // Mock data for the preview buttons
+  const previewLinks = [
+    { platform: "Spotify", color: "#1DB954", action: "Pre-save" },
+    { platform: "Apple Music", color: "#FA243C", action: "Pre-add" },
+    { platform: "Amazon Music", color: "#00A8E1", action: "Pre-save" },
+    { platform: "Deezer", color: "#00C7F2", action: "Pre-save" },
+  ];
+
   return (
     <div className="min-h-screen text-white" style={backgroundStyle}>
       <div className="container mx-auto px-4 py-12">
@@ -69,9 +86,11 @@ export default function MarketingPage() {
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center">
                     <Clock className="mr-1 h-4 w-4 text-amber-500" />
-                    <span className="text-xs">Launches in 2 days</span>
+                    <span className="text-xs">
+                      Launches in less than 24 hours
+                    </span>
                   </div>
-                  <p className="text-xs text-white/60">247 clicks</p>
+                  <p className="text-xs text-white/60">670,000 clicks</p>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {["Spotify", "Apple", "Deezer"].map((platform) => (
@@ -102,7 +121,7 @@ export default function MarketingPage() {
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity hover:opacity-100">
                   <Button variant="secondary" size="sm" asChild>
-                    <Link href="/Eladio_Sauce_Boyz_2_Cover.png">
+                    <Link href="/marketing/sauce-boyz-3">
                       <Pencil className="mr-2 h-4 w-4" /> Edit Page
                     </Link>
                   </Button>
@@ -160,7 +179,7 @@ export default function MarketingPage() {
           </div>
         </div>
 
-        {/* Landing page preview section */}
+        {/* Landing page preview section - Updated Logos */}
         <div className="mt-16">
           <h2 className="mb-8 text-center text-2xl font-semibold">
             Landing Page Preview
@@ -202,47 +221,35 @@ export default function MarketingPage() {
                   </div>
                 </div>
 
-                {/* Streaming links */}
+                {/* Streaming links - Updated Logos */}
                 <div className="space-y-3">
-                  <Button className="w-full justify-between bg-[#1DB954] text-white hover:bg-[#1DB954]/90">
-                    <span className="flex items-center">
-                      <span className="mr-2 h-5 w-5 rounded-full bg-white/20"></span>
-                      Spotify
-                    </span>
-                    <span className="rounded-full bg-white/20 px-2 py-1 text-xs">
-                      Pre-save
-                    </span>
-                  </Button>
-
-                  <Button className="w-full justify-between bg-[#FA243C] text-white hover:bg-[#FA243C]/90">
-                    <span className="flex items-center">
-                      <span className="mr-2 h-5 w-5 rounded-full bg-white/20"></span>
-                      Apple Music
-                    </span>
-                    <span className="rounded-full bg-white/20 px-2 py-1 text-xs">
-                      Pre-add
-                    </span>
-                  </Button>
-
-                  <Button className="w-full justify-between bg-[#00A8E1] text-white hover:bg-[#00A8E1]/90">
-                    <span className="flex items-center">
-                      <span className="mr-2 h-5 w-5 rounded-full bg-white/20"></span>
-                      Amazon Music
-                    </span>
-                    <span className="rounded-full bg-white/20 px-2 py-1 text-xs">
-                      Pre-save
-                    </span>
-                  </Button>
-
-                  <Button className="w-full justify-between bg-[#00C7F2] text-white hover:bg-[#00C7F2]/90">
-                    <span className="flex items-center">
-                      <span className="mr-2 h-5 w-5 rounded-full bg-white/20"></span>
-                      Deezer
-                    </span>
-                    <span className="rounded-full bg-white/20 px-2 py-1 text-xs">
-                      Pre-save
-                    </span>
-                  </Button>
+                  {previewLinks.map((link) => (
+                    <Button
+                      key={link.platform}
+                      className={`w-full justify-between hover:opacity-90`}
+                      style={{ backgroundColor: link.color }}
+                    >
+                      <span className="flex items-center">
+                        <span className="relative mr-2 h-5 w-5">
+                          <Image
+                            src={
+                              platformLogos[
+                                link.platform as keyof typeof platformLogos
+                              ]
+                            }
+                            alt={`${link.platform} logo`}
+                            fill
+                            sizes="20px"
+                            className="object-contain invert filter" // Invert for visibility on colored bg
+                          />
+                        </span>
+                        {link.platform}
+                      </span>
+                      <span className="rounded-full bg-white/20 px-2 py-1 text-xs">
+                        {link.action}
+                      </span>
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>
