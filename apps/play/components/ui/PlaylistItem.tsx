@@ -23,7 +23,6 @@ interface PlaylistItemProps {
 
 const PlaylistItem: React.FC<PlaylistItemProps> = ({
   track,
-  index,
   isPlaying,
   onClick,
   onDoubleClick,
