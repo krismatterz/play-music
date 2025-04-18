@@ -191,11 +191,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  const { data, error } = await supabaseClient
+  const response = await supabaseClient
     .from("shared_tracks")
     .select("*")
     .eq("id", id)
     .single();
+
+  const { data, error } = response as unknown as {
+    data: StoredTrackData;
+    error: Error;
+  };
 
   if (error) {
     return NextResponse.json(

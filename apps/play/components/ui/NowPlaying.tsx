@@ -61,16 +61,10 @@ const NowPlaying: React.FC = () => {
     if (isPlaying) {
       await pause();
     } else {
-      // Only resume if there's a track loaded
       if (contextTrack) {
         await resume();
       }
     }
-  };
-
-  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = Number(event.target.value);
-    void setVolume(newVolume); // Fire and forget volume change
   };
 
   const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {

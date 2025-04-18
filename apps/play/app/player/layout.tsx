@@ -11,7 +11,7 @@ export default function PlayerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isSearchOpen, openSearch, closeSearch } = useSearchModal();
+  const { isSearchOpen, closeSearch } = useSearchModal();
 
   return (
     <div className="flex h-screen bg-black text-white">

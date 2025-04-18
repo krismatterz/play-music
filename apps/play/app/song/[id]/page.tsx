@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { usePlayerActions } from "../../../context/PlayerContext";
 import type { DisplayableTrack } from "../../../context/PlayerContext";
 import ExplicitBadge from "../../../components/ui/ExplicitBadge";
-import type { Track, Artist, Album } from "supabase";
+import type { Track } from "supabase";
 
 // Mock data for the songs
 const songs = [

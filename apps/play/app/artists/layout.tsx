@@ -1,13 +1,7 @@
-export default function ArtistLayout({
+export default function ArtistsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex h-screen w-full items-center justify-center">
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold">Artists</h1>
-      </div>
-    </div>
-  );
+  return <div className="flex-1">{children}</div>;
 }
