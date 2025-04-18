@@ -3,21 +3,14 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") ?? "";
-  const isArtistDomain = hostname.startsWith("artist.");
 
-  // If on artist domain, redirect to artist.play-music.app
-  if (isArtistDomain) {
-    const url = request.nextUrl.clone();
-    url.hostname = "artist.play-music.app";
-    return NextResponse.redirect(url);
+  // If we're on the artist domain, let the artist app handle it
+  if (hostname.startsWith("artist.")) {
+    return NextResponse.next();
   }
 
-  // If on main domain but not artist domain, ensure it's play-music.app
-  if (
-    !isArtistDomain &&
-    hostname !== "play-music.app" &&
-    process.env.NODE_ENV === "production"
-  ) {
+  // For the main app, ensure we're on play-music.app in production
+  if (hostname !== "play-music.app" && process.env.NODE_ENV === "production") {
     const url = request.nextUrl.clone();
     url.hostname = "play-music.app";
     return NextResponse.redirect(url);

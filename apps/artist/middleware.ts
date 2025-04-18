@@ -12,13 +12,23 @@ const isPublicRoute = createRouteMatcher([
 async function handleRequest(request: NextRequest) {
   const hostname = request.headers.get("host") ?? "";
 
-  // If not on artist domain in production, redirect to artist.play-music.app
+  // In production, ensure we're on artist.play-music.app
   if (
     !hostname.startsWith("artist.") &&
     process.env.NODE_ENV === "production"
   ) {
     const url = request.nextUrl.clone();
     url.hostname = "artist.play-music.app";
+    return NextResponse.redirect(url);
+  }
+
+  // In development, ensure we're on localhost:3001
+  if (
+    process.env.NODE_ENV === "development" &&
+    !hostname.includes("localhost:3001")
+  ) {
+    const url = request.nextUrl.clone();
+    url.host = "localhost:3001";
     return NextResponse.redirect(url);
   }
 
