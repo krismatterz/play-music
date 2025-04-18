@@ -28,7 +28,7 @@ const placeholderCover = "/Eladio - DON KBRN.png";
 
 export const artistData = {
   name: "Eladio Carrión",
-  profilePic: placeholderCover,
+  profilePic: "/EladioCarrionAvatar.png",
   monthlyListeners: "15.8M",
 };
 
