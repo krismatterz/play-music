@@ -73,6 +73,11 @@ export default function Player() {
   const { currentTrack: contextCurrentTrack, isPlaying } = usePlayerState();
   const { play, pause, resume } = usePlayerActions();
 
+  // Add background style inspired by ArtistDashboard
+  const backgroundStyle = {
+    backgroundImage: `radial-gradient(ellipse at top, hsl(220 10% 15%) 0%, hsl(220 10% 5%) 70%)`,
+  };
+
   // Local state to track which *list item* was selected, not the *playing* track
   // Defaults to showing the first track's details if nothing is playing yet
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
@@ -111,9 +116,9 @@ export default function Player() {
   }, [displayTrack]);
 
   return (
-    <div className="h-full w-full overflow-auto pb-8">
+    <div className="h-full w-full overflow-auto pb-8" style={backgroundStyle}>
       {/* Header uses displayTrack for initial view before context loads */}
-      <div className="relative h-80 w-full bg-gradient-to-b from-amber-900 to-black">
+      <div className="relative h-80 w-full bg-gradient-to-b from-amber-900/40 to-black/60">
         <div className="absolute inset-0 flex items-end p-8">
           <div className="flex items-end gap-6">
             <div className="relative h-48 w-48 overflow-hidden rounded-lg shadow-2xl">
@@ -129,10 +134,10 @@ export default function Player() {
                 Playlist
               </div>
               <h1 className="mt-1 mb-2 text-6xl font-bold text-white">
-                Your Daily Mix
+                Today&apos;s Top Songs
               </h1>
               <div className="flex items-center gap-1 text-white/80">
-                <span>AI-generated for you • {playlist.length} songs</span>
+                <span>by dJai • {playlist.length} songs</span>
               </div>
             </div>
           </div>
@@ -140,13 +145,13 @@ export default function Player() {
       </div>
 
       {/* Playlist Content */}
-      <div className="bg-gradient-to-b from-black/60 to-black p-8">
+      <div className="bg-gradient-to-b from-black/40 to-transparent p-8">
         {/* Controls use context state/actions */}
         <div className="mb-8 flex items-center gap-6">
           <button
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-black disabled:opacity-50"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-500 text-black transition-colors hover:bg-amber-400 disabled:opacity-50"
             onClick={handleTogglePlayPause}
-            disabled={!contextCurrentTrack && playlist.length === 0} // Disable if nothing to play
+            disabled={!contextCurrentTrack && playlist.length === 0}
           >
             {isPlaying ? (
               <svg
@@ -234,14 +239,14 @@ export default function Player() {
           ))}
         </div>
 
-        {/* AI Recommendation Section (unchanged) */}
+        {/* AI Recommendation Section */}
         <div className="mt-12">
           <h2 className="mb-6 text-2xl font-bold text-white">
             Recommended for you
           </h2>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {/* Recommendation cards would go here */}
-            <div className="group cursor-pointer rounded-md bg-white/5 p-4 transition-all hover:bg-white/10">
+            {/* Recommendation cards */}
+            <div className="group cursor-pointer rounded-lg border border-white/10 bg-black/40 p-4 transition-all hover:border-amber-500/30 hover:shadow-amber-900/20">
               <div className="relative mb-4 aspect-square w-full overflow-hidden rounded-md shadow-md">
                 <Image
                   src="/landing/Martin_Garrix_Weightless_Cover.png"
@@ -249,7 +254,7 @@ export default function Player() {
                   fill
                   className="object-cover transition-all group-hover:scale-105"
                 />
-                <div className="absolute right-2 bottom-2 flex h-12 w-12 translate-y-4 items-center justify-center rounded-full bg-green-500 opacity-0 shadow-lg transition-all group-hover:translate-y-0 group-hover:opacity-100">
+                <div className="absolute right-2 bottom-2 flex h-12 w-12 translate-y-4 items-center justify-center rounded-full bg-amber-500 opacity-0 shadow-lg transition-all group-hover:translate-y-0 group-hover:opacity-100">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -264,13 +269,15 @@ export default function Player() {
                   </svg>
                 </div>
               </div>
-              <h3 className="font-bold text-white">Electronic Vibes</h3>
+              <h3 className="font-bold text-white transition-colors group-hover:text-amber-500">
+                Electronic Vibes
+              </h3>
               <p className="text-sm text-neutral-400">
                 Curated collection of electronic music
               </p>
             </div>
 
-            <div className="group cursor-pointer rounded-md bg-white/5 p-4 transition-all hover:bg-white/10">
+            <div className="group cursor-pointer rounded-lg border border-white/10 bg-black/40 p-4 transition-all hover:border-amber-500/30 hover:shadow-amber-900/20">
               <div className="relative mb-4 aspect-square w-full overflow-hidden rounded-md shadow-md">
                 <Image
                   src="/landing/Bad_Bunny_DTMF_Cover.png"
@@ -278,7 +285,7 @@ export default function Player() {
                   fill
                   className="object-cover transition-all group-hover:scale-105"
                 />
-                <div className="absolute right-2 bottom-2 flex h-12 w-12 translate-y-4 items-center justify-center rounded-full bg-green-500 opacity-0 shadow-lg transition-all group-hover:translate-y-0 group-hover:opacity-100">
+                <div className="absolute right-2 bottom-2 flex h-12 w-12 translate-y-4 items-center justify-center rounded-full bg-amber-500 opacity-0 shadow-lg transition-all group-hover:translate-y-0 group-hover:opacity-100">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -293,7 +300,9 @@ export default function Player() {
                   </svg>
                 </div>
               </div>
-              <h3 className="font-bold text-white">Urbano Latino</h3>
+              <h3 className="font-bold text-white transition-colors group-hover:text-amber-500">
+                Urbano Latino
+              </h3>
               <p className="text-sm text-neutral-400">
                 The best reggaeton and latin urban music
               </p>
