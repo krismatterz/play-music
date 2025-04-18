@@ -139,7 +139,7 @@ export default function HomePage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full bg-gradient-to-r from-amber-500 to-amber-300 px-8 py-4 text-lg font-medium text-white transition-all hover:shadow-lg"
+                  className="rounded-full bg-gradient-to-r from-amber-700 to-amber-400 px-8 py-4 text-lg font-medium text-white transition-all hover:shadow-lg"
                 >
                   Get Started Free
                 </motion.button>

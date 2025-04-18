@@ -3,11 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { IconArrowRight, IconPlayerPlay } from "@tabler/icons-react";
+import { IconArrowRight } from "@tabler/icons-react";
 import SmartPlaylistPreview from "./SmartPlaylistPreview";
 
 // Hero background component with animated elements
 export const HeroBackground: React.FC = () => {
+  const [mounted, setMounted] = React.useState(false);
+
   const [circles, setCircles] = React.useState<
     {
       left: string;
@@ -37,6 +39,7 @@ export const HeroBackground: React.FC = () => {
       animationName: i % 2 === 0 ? "float1" : "float2",
     }));
     setCircles(generated);
+    setMounted(true);
   }, []);
 
   return (
@@ -44,7 +47,7 @@ export const HeroBackground: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-black via-amber-950 to-black"></div>
       {/* Animated circles */}
       <div className="absolute inset-0 opacity-30">
-        {circles.length
+        {mounted && circles.length
           ? circles.map((style, i) => (
               <div
                 key={i}
@@ -52,39 +55,30 @@ export const HeroBackground: React.FC = () => {
                 style={style}
               />
             ))
-          : Array.from({ length: 12 }).map((_, i) => (
-              <div
-                key={i}
-                className="absolute rounded-full bg-gradient-to-br from-amber-700/20 to-amber-300/20 blur-3xl"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  width: "200px",
-                  height: "200px",
-                }}
-              />
-            ))}
+          : null}
       </div>
       {/* Sound wave effect */}
       <div className="absolute right-0 bottom-0 left-0 h-32 opacity-20">
-        {Array.from({ length: 40 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute bottom-0 bg-amber-700"
-            style={{
-              left: `${i * 2.5}%`,
-              height: `${Math.sin(i * 0.2) * 50 + 50}px`,
-              width: "8px",
-              borderRadius: "4px",
-              animationName: "soundWave",
-              animationDuration: "1.5s",
-              animationIterationCount: "infinite",
-              animationDelay: `${i * 0.05}s`,
-            }}
-          />
-        ))}
+        {mounted &&
+          Array.from({ length: 40 }).map((_, i) => (
+            <div
+              key={i}
+              className="sound-wave absolute bottom-0 bg-amber-700"
+              style={{
+                left: `${i * 2.5}%`,
+                height: `${Math.sin(i * 0.2) * 50 + 50}px`,
+                width: "8px",
+                animationDelay: `${i * 0.05}s`,
+              }}
+            />
+          ))}
       </div>
       <style jsx global>{`
+        .sound-wave {
+          width: 8px;
+          border-radius: 4px;
+          animation: soundWave 1.5s infinite;
+        }
         @keyframes float1 {
           0% {
             transform: translate(0, 0) scale(1);
