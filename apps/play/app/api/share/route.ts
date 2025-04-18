@@ -116,7 +116,7 @@ export async function POST(request: Request) {
 
     const requestUrl = new URL(request.url);
     const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ??
+      process.env.NEXT_PUBLIC_PLAY_URL ??
       `${requestUrl.protocol}//${requestUrl.host}`;
     const shareUrl = `${baseUrl}/share/${shareId}`;
 

@@ -46,7 +46,28 @@ export async function getCurrentUser() {
 export async function saveFavoriteTrack(
   userId: string,
   trackId: string,
-  trackDetails: any,
+  trackDetails: {
+    name: string;
+    artists: Array<{
+      name: string;
+      id: string;
+    }>;
+    album: {
+      name: string;
+      images: Array<{
+        url: string;
+        height: number;
+        width: number;
+      }>;
+      id: string;
+    };
+    preview_url: string | null;
+    external_urls: {
+      spotify: string;
+    };
+    spotify_id: string;
+    duration_ms: number;
+  },
 ) {
   return await supabase.from("favorite_tracks").upsert({
     user_id: userId,
@@ -74,7 +95,7 @@ export async function removeFavoriteTrack(userId: string, trackId: string) {
 export async function createPlaylist(
   userId: string,
   name: string,
-  description: string = "",
+  description: string | null = null,
 ) {
   return await supabase
     .from("playlists")
@@ -94,7 +115,28 @@ export async function getPlaylists(userId: string) {
 export async function addTrackToPlaylist(
   playlistId: string,
   trackId: string,
-  trackDetails: any,
+  trackDetails: {
+    name: string;
+    artists: Array<{
+      name: string;
+      id: string;
+    }>;
+    album: {
+      name: string;
+      images: Array<{
+        url: string;
+        height: number;
+        width: number;
+      }>;
+      id: string;
+    };
+    preview_url: string | null;
+    external_urls: {
+      spotify: string;
+    };
+    spotify_id: string;
+    duration_ms: number;
+  },
 ) {
   return await supabase.from("playlist_tracks").insert({
     playlist_id: playlistId,
@@ -116,7 +158,28 @@ export async function getPlaylistTracks(playlistId: string) {
 export async function saveListeningHistory(
   userId: string,
   trackId: string,
-  trackDetails: any,
+  trackDetails: {
+    name: string;
+    artists: Array<{
+      name: string;
+      id: string;
+    }>;
+    album: {
+      name: string;
+      images: Array<{
+        url: string;
+        height: number;
+        width: number;
+      }>;
+      id: string;
+    };
+    preview_url: string | null;
+    external_urls: {
+      spotify: string;
+    };
+    spotify_id: string;
+    duration_ms: number;
+  },
 ) {
   return await supabase.from("listening_history").insert({
     user_id: userId,
@@ -126,7 +189,7 @@ export async function saveListeningHistory(
   });
 }
 
-export async function getListeningHistory(userId: string, limit: number = 50) {
+export async function getListeningHistory(userId: string, limit = 50) {
   return await supabase
     .from("listening_history")
     .select("*")

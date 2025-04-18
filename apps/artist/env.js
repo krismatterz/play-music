@@ -24,7 +24,8 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: z.string().default("/"),
     NEXT_PUBLIC_PLAY_DOMAIN: z.string().default("play-music.app"),
     NEXT_PUBLIC_ARTIST_DOMAIN: z.string().default("artist.play-music.app"),
-    NEXT_PUBLIC_APP_URL: z.string().default("https://play-music.app"),
+    NEXT_PUBLIC_PLAY_URL: z.string().default("https://play-music.app"),
+    NEXT_PUBLIC_ARTIST_URL: z.string().default("https://artist.play-music.app"),
     NEXT_PUBLIC_PRODUCTION_URL: z.string().default("https://play-music.app"),
   },
 
@@ -45,7 +46,8 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
     NEXT_PUBLIC_PLAY_DOMAIN: process.env.NEXT_PUBLIC_PLAY_DOMAIN,
     NEXT_PUBLIC_ARTIST_DOMAIN: process.env.NEXT_PUBLIC_ARTIST_DOMAIN,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_PLAY_URL: process.env.NEXT_PUBLIC_PLAY_URL,
+    NEXT_PUBLIC_ARTIST_URL: process.env.NEXT_PUBLIC_ARTIST_URL,
     NEXT_PUBLIC_PRODUCTION_URL: process.env.NEXT_PUBLIC_PRODUCTION_URL,
   },
   /**

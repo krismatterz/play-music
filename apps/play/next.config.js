@@ -12,7 +12,7 @@ const config = {
     externalDir: true, // Allow importing from outside the app directory
   },
   images: {
-    domains: ["play-music.app", "artist.play-music.app"],
+    domains: ["play-music.app"],
   },
 };
 

@@ -9,7 +9,7 @@ const config = {
   reactStrictMode: true,
   transpilePackages: ["@play/ui"], // Ensure shared UI package is transpiled
   images: {
-    domains: ["artist.play-music.app", "play-music.app"],
+    domains: ["artist.play-music.app"],
   },
 };
 
