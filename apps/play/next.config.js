@@ -11,6 +11,9 @@ const config = {
   experimental: {
     externalDir: true, // Allow importing from outside the app directory
   },
+  images: {
+    domains: ["play-music.app", "artist.play-music.app"],
+  },
 };
 
 export default config;
