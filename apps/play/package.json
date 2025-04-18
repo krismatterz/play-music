@@ -2,6 +2,7 @@
   "name": "play",
   "version": "0.2.5",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --port 3000 --turbopack",
     "build": "next build",
